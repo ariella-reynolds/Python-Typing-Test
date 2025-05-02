@@ -4,7 +4,7 @@
 import tkinter as tk
 from tkinter import ttk
 import pygame
-#import json
+import json
 import requests
 #import math
 #import threading
@@ -37,23 +37,33 @@ word_counter = Counter() # tracks number of times a particular word emerges duri
 total_char = 0 # tracks total number of characters encountered during a test (starts at 0)
 
 """# Loading Text
-(D = Ariella; O = Tenzin)
+(D = Tenzin; O = Ariella)
 """
+# Attempt to load local JSON passages from typing_passages.json
+try:
+    with open("typing_passages.json", "r", encoding="utf-8") as f:
+        LOCAL_PASSAGES = json.load(f).get("passages", [])
+except (FileNotFoundError, json.JSONDecodeError):
+    LOCAL_PASSAGES = []
 
-API_URL = "https://quoteapi.pythonanywhere.com/" # test retrieves quotations from this site
-def retrieve_quotation(): # function retrieves quotation
-  try:
-    quotation = requests.get(API_URL) # requests quotation from our chosen API
-    if quotation.ok: # if quotation can be retrieved
-      text = quotation.json()['content'] # specifically transfers quotation from API to Python; JSON string is converted into Python object
-      for word in text.split(): # isolates each word in the text
-        word_counter[word.lower()] += 1 # every time a particular word appears, a word counter is updated to keep track of how many times that word has appeared during the test; also makes sure each word is lowercase
-      return text
-  except: # if quotation cannot be retrieved
-    fallback = random.choice(["We hope you're enjoying our typing test!","Feel free to share this test with your friends to see whose typing reigns supreme!"]) # example sentences that user can type if quotations do not load
-    for word in fallback.split(): # isolates each word in the text
-      word_counter[word.lower()] += 1 # every time a particular word appears, a word counter is updated to keep track of how many times that word has appeared during the test; also makes sure each word is lowercase
-    return fallback
+# Built-in fallback passages if JSON is missing or broken
+FALLBACK_PASSAGES = [
+    "We hope you're enjoying our typing test!",
+    "Feel free to share this test with your friends to see whose typing reigns supreme!",
+    "Sometimes the best way to start is simply to begin, one word at a time.",
+    "This is a fallback passage, used when your local text file can't be found."
+]
+
+def retrieve_quotation():
+    if LOCAL_PASSAGES:
+        text = random.choice(LOCAL_PASSAGES)
+    else:
+        print("Using fallback passage — typing_passages.json missing or empty.")
+        text = random.choice(FALLBACK_PASSAGES)
+
+    for word in text.split():
+        word_counter[word.lower()] += 1
+    return text
 
 """# Establishing Proximity of Letters (Relative to Each Other)
 (D = Ariella; O = Tenzin)
