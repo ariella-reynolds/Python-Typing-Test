@@ -1,30 +1,33 @@
 # -*- coding: utf-8 -*-
 
-
-import numpy as np
+#import numpy as np
 import tkinter as tk
 from tkinter import ttk
 import pygame
-import json
+#import json
 import requests
-import math
-import threading
-import os
+#import math
+#import threading
+#import os
 import random
 import time
 from collections import defaultdict, Counter
-import matplotlib.pyplot as plt
-from scipy.io import wavfile
-from IPython.display import Audio, display
+#import matplotlib.pyplot as plt
+#from scipy.io import wavfile
+#from IPython.display import Audio, display
 
 
-
-"""# Setting Up Test (Initialization)
-(D = Ariella; O = Tenzin)
-"""
+# Setting Up Test (Initialization)
+# (D = Ariella; O = Tenzin)
 
 pygame.mixer.init() # initializes pygame mixer, which creates sound effects within typing test
-key_sound = pygame.mixer.Sound('type.wav') # loads file that provides sound effects (key tapping sounds as user types)
+try:
+  key_sound = pygame.mixer.Sound('type.wav') # loads file that provides sound effects (key tapping sounds as user types)
+except Exception as e:
+  print(f"Sound loading error: {e}")
+  key_sound = None
+
+# Global Variables
 start_time = None # tracks elapsed time (starts at 0)
 char_position = 0 # tracks position of character within string of text (starts at 0)
 errors = 0 # tracks number of mistakes made by user (starts at 0)
@@ -65,6 +68,7 @@ keyboard_proximity = { # two letters were considered close to each other -- i.e.
 """
 
 class PythonTypingTestApp: # defines class of GUI
+  
   def __init__(self,root): # initializes new objects within the class
     self.root = root # sets up and saves main window of typing test
     self.root.title("Python Typing Test") # creates title of typing test
@@ -72,55 +76,90 @@ class PythonTypingTestApp: # defines class of GUI
 
     self.setup_widgets() # places the elements of our GUI within the test (detailed in next section of the code)
     self.reset_test() # clears all previous data before (re)starting test
+  
+  """# Adding Specific Features to GUI (D = Ariella; O = Tenzin)"""
+  def setup_widgets(self): # adds different elements to typing test
+    self.root.configure(bg="#4682b4")  # Background color
 
-"""# Adding Specific Features to GUI
-(D = Ariella; O = Tenzin)
-"""
+    heading = tk.Label(self.root, text="Python Typing Test", font=('Times New Roman', 24, 'bold'), bg="#fda4ba", fg="#fffffd")
+    heading.pack(pady=(20, 10))
 
-def add_features(self): # adds different elements to typing test
-  self.difficulty = tk.StringVar(value = "medium") # stores difficulty level, with medium difficulty level as default
-  ttk.Label(self.root, text = "Difficulty:").pack() # labels difficulty level selection window ("Difficulty:")
-  ttk.Combobox(self.root, textvariable = self.difficulty, values = ["easy","medium","hard"]).pack() # allows user to select difficulty (either "easy," "medium," or "hard") through a dropdown option
+    self.difficulty = tk.StringVar(value = "medium") # stores difficulty level, with medium difficulty level as default
+    ttk.Label(self.root, text="Select Difficulty:", font=('Times New Roman', 14), background="#f4f4f4").pack(pady=(20, 5)) # labels difficulty level selection window ("Difficulty:")
+    ttk.Combobox(self.root, textvariable = self.difficulty, values = ["easy","medium","hard"]).pack() # allows user to select difficulty (either "easy," "medium," or "hard") through a dropdown option
 
-  self.display_text = tk.Text(self.root, height = 4, font=('Times New Roman',18)) # displays text for user to type
-  self.display_text.pack(fill = 'x') # displayed horizontally for readability
-  self.display_text.config(state = 'disabled') # read-only display
+    self.display_text = tk.Text(self.root, height = 4, font=('Times New Roman',18), wrap='word', bg='#ffffff', fg='#333333', relief='solid', bd=1) # displays text for user to type
+    self.display_text.pack(fill = 'x', padx=20, pady=10) # displayed horizontally for readability
+    self.display_text.config(state = 'disabled') # read-only display
 
-  self.input_var = tk.StringVar() # stores text as user types
-  self.entry = tk.Entry(self.root, textvariable = self.input_var, font=('Times New Roman',18)) # provides box in which user can type; user will type in same font as display text
-  self.entry.pack(fill = 'x') # displayed horizontally (text should be written from left to right)
-  self.entry.bind('<KeyRelease>', self.on_key_press) # checks which key is pressed, which allows program to determine accuracy of typed text as compared to provided text
+    self.input_var = tk.StringVar() # stores text as user types
+    self.entry = tk.Entry(self.root, textvariable = self.input_var, font=('Times New Roman',18), bg='#f0f0f0', fg='#000000', relief='groove', bd=2) # provides box in which user can type; user will type in same font as display text
+    self.entry.pack(fill = 'x', padx=20, pady=(0, 15)) # displayed horizontally (text should be written from left to right)
+    self.entry.bind('<KeyRelease>', self.on_key_press) # checks which key is pressed, which allows program to determine accuracy of typed text as compared to provided text
 
-  self.progress = ttk.Progressbar(self.root, maximum = 100) # creates progress bar, with 100% as maximum value
-  self.progress.pack(fill = 'x') # displayed horizontally (progress bars are generally horizontal)
+    self.progress = ttk.Progressbar(self.root, maximum = 100) # creates progress bar, with 100% as maximum value
+    self.progress.pack(fill = 'x', padx=20, pady=(0, 15)) # displayed horizontally (progress bars are generally horizontal)
+    
+    # Custom styled pink button
+    style = ttk.Style()
+    style.theme_use("clam")
+    style.configure("Pink.TButton", background="#fda4ba", foreground="white", font=('Times New Roman', 14, 'bold'), padding=6)
+    style.map("Pink.TButton",background=[("active", "#fdab4a")],foreground=[("disabled", "#ccc")])
+    
+    self.restart_btn = ttk.Button(self.root, text = "Restart Test", command = self.reset_test, style="Pink.TButton") # user can restart typing test by pressing "Restart Test" button
+    self.restart_btn.pack(pady=(5, 20))
+  
+  """# Resetting Typing Test (D = Ariella; O = Tenzin)"""
+  def reset_test (self): # clears prior attempt and creates fresh test for user after restarting
+    global start_time, char_position, errors, total_char # makes sure these variables can be accessed within this function, even though they are created outside the function
+    self.test = retrieve_quotation() # calls function that retrieves quotation, which gives users a new quotation to type
+    self.entry.delete(0, 'end') # clears entry box
+    self.display_text.config(state = 'normal') # allows display to be edited (in this case, by updating it to create a new test)
+    self.display_text.delete('1.0','end') # clears text from previous test
+    self.display_text.insert('1.0',self.test) # places new text into text display window
+    self.display_text.config(state = 'disabled') # switches display back to read-only format
+    start_time = None # resets elapsed time to 0
+    char_position = 0 # resets position of character within string of text to 0
+    errors = 0 # resets number of mistakes made by user to 0
+    total_char = len(self.test) # tracks total number of characters encountered during new test
+    self.progress['value'] = 0 # resets progress bar to 0%
+    self.input_var.set("") # clears "StringVar" variable so that no text is stored from the previous test and text from the new test can be stored instead
+    
+    """# Indicating What Happens When a User Presses a Key (D = Tenzin; O = Ariella)"""
+  def on_key_press(self, event):
+    global start_time, char_position, errors, total_char
+    if not start_time:
+      start_time = time.time()
+      typed_text = self.entry.get()
+      target_text = self.test
 
-  self.restart_btn = ttk.Button(self.root, text = "Restart Test", command = self.reset_test) # user can restart typing test by pressing "Restart Test" button
+    # Stop if user types more than target
+    if char_position >= len(target_text):
+      return
+    
+    expected_char = target_text[char_position]
 
-"""# Resetting Typing Test
-(D = Ariella; O = Tenzin)
-"""
+    # Sound effect on keypress
+    key_sound.play()
 
-def reset_test (self): # clears prior attempt and creates fresh test for user after restarting
-  global start_time, char_position, errors, total_char # makes sure these variables can be accessed within this function, even though they are created outside the function
-  self.test = retrieve_quotation() # calls function that retrieves quotation, which gives users a new quotation to type
-  self.entry.delete(0, 'end') # clears entry box
-  self.display_text.config(state = 'normal') # allows display to be edited (in this case, by updating it to create a new test)
-  self.display_text.delete('1.0','end') # clears text from previous test
-  self.display_text.insert('1.0',self.text) # places new text into text display window
-  self.display_text.config(state = 'disabled') # switches display back to read-only format
-  start_time = None # resets elapsed time to 0
-  char_position = 0 # resets position of character within string of text to 0
-  errors = 0 # resets number of mistakes made by user to 0
-  total_char = len(self.text) # tracks total number of characters encountered during new test
-  self.progress['value'] = 0 # resets progress bar to 0%
-  self.input_var.set("") # clears "StringVar" variable so that no text is stored from the previous test and text from the new test can be stored instead
+    if typed_text[-1:] == expected_char:
+      char_position += 1
+      self.progress['value'] = (char_position / total_char) * 100
+    else:
+      errors += 1
+      character_mistype[expected_char] += 1
+      
+    if char_position == total_char:
+      end_time = time.time()
+      elapsed_minutes = (end_time - start_time) / 60
+      words_typed = len(target_text.split())
+      wpm = words_typed / elapsed_minutes
+      wpm_tracker.append(wpm)
+      self.entry.config(state='disabled')  # Disable input after finishing
+      print(f"Typing Complete. WPM: {wpm:.2f}, Errors: {errors}")
 
-"""# Indicating What Happens When a User Presses a Key
-(D = Ariella; O = Tenzin)
-"""
-
-def on_key_press(self, event): # checks which key is pressed
-  global start_time, char_position, errors, total_char # makes sure these variables can be accessed within this function, even though they are created outside the function
-
-  if not start_time: # if timer has not started yet
-    start_time = time.time() # starts timer once user first presses key
+# Run the GUI
+if __name__ == "__main__":
+  root = tk.Tk()
+  app = PythonTypingTestApp(root)
+  root.mainloop()
