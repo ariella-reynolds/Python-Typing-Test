@@ -4,25 +4,27 @@ def load_text_file(path):
     with open(path, 'r', encoding='utf-8') as f:
         return f.read()
 
-def split_into_passages(text, max_length=400):
+def split_into_passages(text, max_length=600, min_length=200):
     paragraphs = [p.strip().replace('\n', ' ') for p in text.split('\n\n') if p.strip()]
     passages = []
 
     for para in paragraphs:
         if len(para) <= max_length:
-            passages.append(para)
+            if len(para) >= min_length:
+                passages.append(para)
         else:
             sentences = para.split('. ')
             chunk = ""
             for s in sentences:
-                if len(chunk) + len(s) < max_length:
-                    chunk += s + '. '
+                sentence = s + '. '
+                if len(chunk) + len(sentence) < max_length:
+                    chunk += sentence
                 else:
-                    passages.append(chunk.strip())
-                    chunk = s + '. '
-            if chunk:
+                    if len(chunk.strip()) >= min_length:
+                        passages.append(chunk.strip())
+                    chunk = sentence
+            if chunk.strip() and len(chunk.strip()) >= min_length:
                 passages.append(chunk.strip())
-
     return passages
 
 def save_as_json(passages, out_file='typing_passages.json'):

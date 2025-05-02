@@ -54,12 +54,12 @@ FALLBACK_PASSAGES = [
     "This is a fallback passage, used when your local text file can't be found."
 ]
 
-def retrieve_quotation():
+def retrieve_quotation(num_paragraphs=3):
     if LOCAL_PASSAGES:
-        text = random.choice(LOCAL_PASSAGES)
+        return random.sample(LOCAL_PASSAGES, k=num_paragraphs)
     else:
         print("Using fallback passage — typing_passages.json missing or empty.")
-        text = random.choice(FALLBACK_PASSAGES)
+        return random.sample(LOCAL_PASSAGES, k=num_paragraphs)
 
     for word in text.split():
         word_counter[word.lower()] += 1
@@ -83,6 +83,14 @@ class PythonTypingTestApp: # defines class of GUI
     self.root = root # sets up and saves main window of typing test
     self.root.title("Python Typing Test") # creates title of typing test
     self.root.geometry('900x500') # specifies size of window
+
+    #multi-stage tracking variables
+    self.paragraphs = []
+    self.current_index = 0
+    self.total_errors = 0
+    self.total_chars = 0
+    self.total_words = 0
+    self.full_start_time = None
 
     self.setup_widgets() # places the elements of our GUI within the test (detailed in next section of the code)
     self.reset_test() # clears all previous data before (re)starting test
@@ -122,7 +130,14 @@ class PythonTypingTestApp: # defines class of GUI
   """# Resetting Typing Test (D = Ariella; O = Tenzin)"""
   def reset_test (self): # clears prior attempt and creates fresh test for user after restarting
     global start_time, char_position, errors, total_char # makes sure these variables can be accessed within this function, even though they are created outside the function
-    self.test = retrieve_quotation() # calls function that retrieves quotation, which gives users a new quotation to type
+    self.paragraphs = retrieve_quotation(num_paragraphs=3) # calls function that retrieves quotation, which gives users a new quotation to type
+    self.current_index = 0
+    self.total_errors = 0
+    self.total_chars = 0
+    self.total_words = 0
+    self.full_start_time = None
+    self.load_paragraph()
+    
     self.entry.delete(0, 'end') # clears entry box
     self.display_text.config(state = 'normal') # allows display to be edited (in this case, by updating it to create a new test)
     self.display_text.delete('1.0','end') # clears text from previous test
@@ -134,8 +149,32 @@ class PythonTypingTestApp: # defines class of GUI
     total_char = len(self.test) # tracks total number of characters encountered during new test
     self.progress['value'] = 0 # resets progress bar to 0%
     self.input_var.set("") # clears "StringVar" variable so that no text is stored from the previous test and text from the new test can be stored instead
-    
-    """# Indicating What Happens When a User Presses a Key (D = Tenzin; O = Ariella)"""
+
+  ''' '''
+  def load_paragraph(self):
+    global char_position, errors, total_char, start_time
+
+    if self.current_index == 0:
+      self.full_start_time = time.time()
+
+    self.test = self.paragraphs[self.current_index]
+    self.display_text.config(state='normal')
+    self.display_text.delete('1.0', 'end')
+    self.display_text.insert('1.0', self.test)
+    self.display_text.config(state='disabled')
+
+    self.entry.config(state='normal')
+    self.entry.delete(0, 'end')
+
+    start_time = None
+    char_position = 0
+    errors = 0
+    total_char = len(self.test)
+    self.progress['value'] = 0
+    self.input_var.set("") 
+   
+  
+  """# Indicating What Happens When a User Presses a Key (D = Tenzin; O = Ariella)"""
   def on_key_press(self, event):
     global start_time, char_position, errors, total_char
     if not start_time:
@@ -162,11 +201,22 @@ class PythonTypingTestApp: # defines class of GUI
     if char_position == total_char:
       end_time = time.time()
       elapsed_minutes = (end_time - start_time) / 60
-      words_typed = len(target_text.split())
-      wpm = words_typed / elapsed_minutes
-      wpm_tracker.append(wpm)
-      self.entry.config(state='disabled')  # Disable input after finishing
-      print(f"Typing Complete. WPM: {wpm:.2f}, Errors: {errors}")
+      words_typed = len(self.test.split())
+      wpm = words_typed / elapsed_minutes if elapsed_minutes > 0 else 0
+
+      self.total_errors += errors
+      self.total_chars += len(self.test)
+      self.total_words += words_typed
+
+      self.current_index += 1
+
+      if self.current_index < len(self.paragraphs):
+         self.load_paragraph()
+      else:
+        full_elapsed = (end_time - self.full_start_time) / 60
+        final_wpm = self.total_words / full_elapsed if full_elapsed > 0 else 0
+        self.entry.config(state='disabled')
+        self.results_label.config(text=f"Test Complete! WPM: {final_wpm:.2f} | Total Errors: {self.total_errors}")
 
 # Run the GUI
 if __name__ == "__main__":
