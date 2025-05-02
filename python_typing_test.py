@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#import numpy as np
+import numpy as np
 import tkinter as tk
 from tkinter import ttk
 import pygame
