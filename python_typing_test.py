@@ -95,7 +95,7 @@ class PythonTypingTestApp: # defines class of GUI
     self.setup_widgets() # places the elements of our GUI within the test (detailed in next section of the code)
     self.reset_test() # clears all previous data before (re)starting test
   
-  """# Adding Specific Features to GUI (D = Ariella; O = Tenzin)"""
+  """# Adding Specific Features to GUI (D = Ariella, Tenzin)"""
   def setup_widgets(self): # adds different elements to typing test
     self.root.configure(bg="#4682b4")  # Background color
 
@@ -118,6 +118,9 @@ class PythonTypingTestApp: # defines class of GUI
     self.progress = ttk.Progressbar(self.root, maximum = 100) # creates progress bar, with 100% as maximum value
     self.progress.pack(fill = 'x', padx=20, pady=(0, 15)) # displayed horizontally (progress bars are generally horizontal)
     
+    self.end_btn = ttk.Button(self.root, text="End Test", command=self.end_test, style="Pink.TButton")
+    self.end_btn.pack(pady=(0, 20))
+
     # Custom styled pink button
     style = ttk.Style()
     style.theme_use("clam")
@@ -150,7 +153,7 @@ class PythonTypingTestApp: # defines class of GUI
     self.progress['value'] = 0 # resets progress bar to 0%
     self.input_var.set("") # clears "StringVar" variable so that no text is stored from the previous test and text from the new test can be stored instead
 
-  ''' '''
+  ''' (D = Tenzin; O = Ariella)'''
   def load_paragraph(self):
     global char_position, errors, total_char, start_time
 
@@ -173,7 +176,6 @@ class PythonTypingTestApp: # defines class of GUI
     self.progress['value'] = 0
     self.input_var.set("") 
    
-  
   """# Indicating What Happens When a User Presses a Key (D = Tenzin; O = Ariella)"""
   def on_key_press(self, event):
     global start_time, char_position, errors, total_char
@@ -218,60 +220,75 @@ class PythonTypingTestApp: # defines class of GUI
         self.entry.config(state='disabled')
         self.results_label.config(text=f"Test Complete! WPM: {final_wpm:.2f} | Total Errors: {self.total_errors}")
 
-    def show_results(self):
-        global wpm_records
+  def end_test(self):
+    end_time = time.time()
+    full_elapsed = (end_time - self.full_start_time) / 60 if self.full_start_time else 1
+    final_wpm = self.total_words / full_elapsed if full_elapsed > 0 else 0
 
-        time_taken = time.time() - start_time
-        word_count = len(self.text.split())
-        wpm = (word_count / time_taken) * 60
-        accuracy = ((len(self.text) - errors) / len(self.text)) * 100
-        wpm_records.append(wpm)
+    self.entry.config(state='disabled')
+    self.display_text.config(state='disabled')
+    self.progress['value'] = 100  # force full bar
 
-        result = tk.Toplevel(self.root)
-        result.title("Results")
-        ttk.Label(result, text=f"WPM: {wpm:.2f}").pack()
-        ttk.Label(result, text=f"Accuracy: {accuracy:.2f}%").pack()
-        ttk.Label(result, text=f"Highest Speed: {max(wpm_records):.2f} WPM").pack()
-        ttk.Label(result, text=f"Average Speed: {sum(wpm_records)/len(wpm_records):.2f} WPM").pack()
+    if hasattr(self, 'results_label'):
+      self.results_label.config(text=f"Test Ended! WPM: {final_wpm:.2f} | Total Errors: {self.total_errors}")
+    else:
+      self.results_label = ttk.Label(self.root, text=f"Test Ended! WPM: {final_wpm:.2f} | Total Errors: {self.total_errors}", font=('Times New Roman', 14), background="#f4f4f4")
+      self.results_label.pack()
 
-        self.plot_error_rate_chart(result)
-        self.plot_heatmap(result)
+  def show_results(self):
+    global wpm_records
 
-        self.save_typing_analysis()
+    time_taken = time.time() - start_time
+    word_count = len(self.text.split())
+    wpm = (word_count / time_taken) * 60
+    accuracy = ((len(self.text) - errors) / len(self.text)) * 100
+    wpm_records.append(wpm)
 
-    def plot_error_rate_chart(self, parent):
-        fig, ax = plt.subplots(figsize=(5, 3))
-        keys = list(character_mistype.keys())
-        values = [character_mistype[k] for k in keys]
-        ax.bar(keys, values)
-        ax.set_title("Typing Error Frequency")
-        ax.set_ylabel("Mistakes")
-        plt.tight_layout()
-        fig.canvas.manager.set_window_title("Error Analysis")
-        plt.show()
+    result = tk.Toplevel(self.root)
+    result.title("Results")
+    ttk.Label(result, text=f"WPM: {wpm:.2f}").pack()
+    ttk.Label(result, text=f"Accuracy: {accuracy:.2f}%").pack()
+    ttk.Label(result, text=f"Highest Speed: {max(wpm_records):.2f} WPM").pack()
+    ttk.Label(result, text=f"Average Speed: {sum(wpm_records)/len(wpm_records):.2f} WPM").pack()
 
-    def plot_heatmap(self, parent):
-        heat_data = [[0]*10 for _ in range(5)]
-        for char, count in character_mistype.items():
-            row = ord(char.lower()) // 10 % 5
-            col = ord(char.lower()) % 10
-            heat_data[row][col] = count
+    self.plot_error_rate_chart(result)
+    self.plot_heatmap(result)
 
-        fig, ax = plt.subplots()
-        cax = ax.imshow(heat_data, cmap='Reds', interpolation='nearest')
-        ax.set_title("Typing Error Heatmap")
-        fig.colorbar(cax)
-        plt.tight_layout()
-        plt.show()
+    self.save_typing_analysis()
 
-    def save_typing_analysis(self):
-        analysis_data = {
-            "common_errors": dict(character_mistype),
-            "proximity_map": keyboard_proximity,
-            "common_words": dict(word_counter.most_common(20))
-        }
-        with open("typing_analysis.json", "w") as f:
-            json.dump(analysis_data, f, indent=4)
+  def plot_error_rate_chart(self, parent):
+    fig, ax = plt.subplots(figsize=(5, 3))
+    keys = list(character_mistype.keys())
+    values = [character_mistype[k] for k in keys]
+    ax.bar(keys, values)
+    ax.set_title("Typing Error Frequency")
+    ax.set_ylabel("Mistakes")
+    plt.tight_layout()
+    fig.canvas.manager.set_window_title("Error Analysis")
+    plt.show()
+
+  def plot_heatmap(self, parent):
+    heat_data = [[0]*10 for _ in range(5)]
+    for char, count in character_mistype.items():
+      row = ord(char.lower()) // 10 % 5
+      col = ord(char.lower()) % 10
+      heat_data[row][col] = count
+      
+      fig, ax = plt.subplots()
+      cax = ax.imshow(heat_data, cmap='Reds', interpolation='nearest')
+      ax.set_title("Typing Error Heatmap")
+      fig.colorbar(cax)
+      plt.tight_layout()
+      plt.show()
+
+  def save_typing_analysis(self):
+    analysis_data = {
+       "common_errors": dict(character_mistype),
+       "proximity_map": keyboard_proximity,
+       "common_words": dict(word_counter.most_common(20))}
+    
+    with open("typing_analysis.json", "w") as f:
+      json.dump(analysis_data, f, indent=4)
 
 # Run the GUI
 if __name__ == "__main__":
