@@ -12,7 +12,7 @@ import requests
 import random
 import time
 from collections import defaultdict, Counter
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 #from scipy.io import wavfile
 #from IPython.display import Audio, display
 
@@ -217,6 +217,61 @@ class PythonTypingTestApp: # defines class of GUI
         final_wpm = self.total_words / full_elapsed if full_elapsed > 0 else 0
         self.entry.config(state='disabled')
         self.results_label.config(text=f"Test Complete! WPM: {final_wpm:.2f} | Total Errors: {self.total_errors}")
+
+    def show_results(self):
+        global wpm_records
+
+        time_taken = time.time() - start_time
+        word_count = len(self.text.split())
+        wpm = (word_count / time_taken) * 60
+        accuracy = ((len(self.text) - errors) / len(self.text)) * 100
+        wpm_records.append(wpm)
+
+        result = tk.Toplevel(self.root)
+        result.title("Results")
+        ttk.Label(result, text=f"WPM: {wpm:.2f}").pack()
+        ttk.Label(result, text=f"Accuracy: {accuracy:.2f}%").pack()
+        ttk.Label(result, text=f"Highest Speed: {max(wpm_records):.2f} WPM").pack()
+        ttk.Label(result, text=f"Average Speed: {sum(wpm_records)/len(wpm_records):.2f} WPM").pack()
+
+        self.plot_error_rate_chart(result)
+        self.plot_heatmap(result)
+
+        self.save_typing_analysis()
+
+    def plot_error_rate_chart(self, parent):
+        fig, ax = plt.subplots(figsize=(5, 3))
+        keys = list(character_mistype.keys())
+        values = [character_mistype[k] for k in keys]
+        ax.bar(keys, values)
+        ax.set_title("Typing Error Frequency")
+        ax.set_ylabel("Mistakes")
+        plt.tight_layout()
+        fig.canvas.manager.set_window_title("Error Analysis")
+        plt.show()
+
+    def plot_heatmap(self, parent):
+        heat_data = [[0]*10 for _ in range(5)]
+        for char, count in character_mistype.items():
+            row = ord(char.lower()) // 10 % 5
+            col = ord(char.lower()) % 10
+            heat_data[row][col] = count
+
+        fig, ax = plt.subplots()
+        cax = ax.imshow(heat_data, cmap='Reds', interpolation='nearest')
+        ax.set_title("Typing Error Heatmap")
+        fig.colorbar(cax)
+        plt.tight_layout()
+        plt.show()
+
+    def save_typing_analysis(self):
+        analysis_data = {
+            "common_errors": dict(character_mistype),
+            "proximity_map": keyboard_proximity,
+            "common_words": dict(word_counter.most_common(20))
+        }
+        with open("typing_analysis.json", "w") as f:
+            json.dump(analysis_data, f, indent=4)
 
 # Run the GUI
 if __name__ == "__main__":
