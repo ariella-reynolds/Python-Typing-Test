@@ -1,5 +1,9 @@
 {
-    "common_errors": {},
+    "common_errors": {
+        "h": 1,
+        "a": 1,
+        "t": 1
+    },
     "proximity_map": {
         "a": [
             "q",
@@ -164,5 +168,9 @@
             "k"
         ]
     },
-    "common_words": {}
+    "common_words": {
+        "'That": 1,
+        "and": 1,
+        "": 1
+    }
 }

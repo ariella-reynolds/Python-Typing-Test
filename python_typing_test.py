@@ -54,8 +54,14 @@ FALLBACK_PASSAGES = [
 ]
 
 def retrieve_quotation(num_paragraphs=3):
+    global word_counter
     if LOCAL_PASSAGES:
-      return random.sample(LOCAL_PASSAGES, k=num_paragraphs)
+      string1 = random.sample(LOCAL_PASSAGES, k=num_paragraphs)[0].replace('‘', '\'').replace('’', '\'')
+      string1 = string1.replace('–', '-')[:10]
+      word_counter = Counter(string1.split(" "))
+      print()
+      print(string1)
+      return [string1,]
     else:
       return random.sample(FALLBACK_PASSAGES, k=num_paragraphs)
 
@@ -89,6 +95,10 @@ class PythonTypingTestApp: # defines class of GUI
 
     heading = tk.Label(self.root, text="Python Typing Test", font=('Times New Roman', 24, 'bold'), bg="#fda4ba", fg="#fffffd")
     heading.pack(pady=(20, 10))
+
+    self.difficulty = tk.StringVar(value = "medium") # stores difficulty level, with medium difficulty level as default
+    ttk.Label(self.root, text="Select Difficulty:", font=('Times New Roman', 14), background="#f4f4f4").pack(pady=(20, 5)) # labels difficulty level selection window ("Difficulty:")
+    ttk.Combobox(self.root, textvariable = self.difficulty, values = ["easy","medium","hard"]).pack() # allows user to select difficulty (either "easy," "medium," or "hard") through a dropdown option
 
     self.display_text = tk.Text(self.root, height=4, font=('Times New Roman',18), wrap='word', bg='#ffffff', fg='#333333', relief='solid', bd=1)
     self.display_text.pack(fill='x', padx=20, pady=10)
@@ -132,7 +142,7 @@ class PythonTypingTestApp: # defines class of GUI
     self.display_text.config(state = 'normal') # allows display to be edited (in this case, by updating it to create a new test)
     self.display_text.delete('1.0','end') # clears text from previous test
     self.display_text.insert('1.0',self.test) # places new text into text display window
-    self.display_text.config(state = 'normal') # switches display back to read-only format
+    self.display_text.config(state = 'disabled') # switches display back to read-only format
     
     self.hidden_input.delete(0, 'end')
     self.hidden_input.focus_set()
@@ -172,29 +182,39 @@ class PythonTypingTestApp: # defines class of GUI
     typed_text = self.hidden_input.get()
     target_text = self.test
 
+    # Sound effect on keypress
+    key_sound.play()
+
     # Temporarily enable display to apply tags
     self.display_text.config(state='normal')
     self.display_text.tag_remove("correct", "1.0", "end")
     self.display_text.tag_remove("incorrect", "1.0", "end")
+    self.display_text.config(state='disabled')
+
+    #self.hidden_input.delete(0, 'end')
+    #self.hidden_input.focus_set()
 
     min_len = min(len(typed_text), len(target_text))
     errors = 0
 
+    i = min_len - 1
+    expected = target_text[i]
+    typed = typed_text[i]
+    if typed != expected:
+      errors += 1
+      character_mistype[expected] += 1
     for i in range(min_len):
       expected = target_text[i]
       typed = typed_text[i]
       tag = "correct" if typed == expected else "incorrect"
-      if typed != expected:
-        errors += 1
-        character_mistype[expected] += 1
       self.display_text.tag_add(tag, f"1.{i}", f"1.{i+1}")
-
+    self.progress['value'] = (min_len / total_char) * 100
     for i in range(len(target_text), len(typed_text)):
       self.display_text.tag_add("incorrect", f"1.{i}", f"1.{i+1}")
       errors += 1
 
       self.display_text.config(state='disabled')
-      self.progress['value'] = (min_len / total_char) * 100
+      
 
       if typed_text == target_text:
         self.end_test()
@@ -202,6 +222,17 @@ class PythonTypingTestApp: # defines class of GUI
   def end_test(self):
     end_time = time.time()
     full_elapsed = (end_time - self.full_start_time) / 60 if self.full_start_time else 1
+    
+    #recalculate errors with a 'for' loop here
+  
+    typed_text = self.hidden_input.get()
+    target_text = self.test
+    errors = 0 
+    for i in range(len(typed_text)):
+      expected = target_text[i]
+      typed = typed_text[i]
+      if typed != expected:
+        errors += 1
     self.total_errors += errors
     self.total_chars += len(self.test)
     self.total_words += len(self.test.split())
@@ -258,6 +289,8 @@ class PythonTypingTestApp: # defines class of GUI
     plt.show()
 
   def save_typing_analysis(self):
+    print(word_counter)
+    print(word_counter.most_common(20))
     analysis_data = {
        "common_errors": dict(character_mistype),
        "proximity_map": keyboard_proximity,

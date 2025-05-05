@@ -35,3 +35,6 @@ def save_as_json(passages, out_file='typing_passages.json'):
 text = load_text_file("R.-F.-Kuang-Babel.txt")
 passages = split_into_passages(text)
 save_as_json(passages, out_file='typing_passages.json')
+
+
+
