@@ -1,8 +1,15 @@
 {
     "common_errors": {
-        "p": 1,
-        "r": 1,
-        "n": 3
+        "T": 1,
+        "h": 2,
+        "n": 1,
+        "a": 3,
+        "I": 3,
+        "c": 1,
+        "o": 2,
+        "d": 3,
+        "u": 2,
+        "t": 3
     },
     "proximity_map": {
         "a": [
@@ -169,25 +176,25 @@
         ]
     },
     "common_words": {
-        "and": 5,
-        "to": 4,
-        "the": 3,
-        "of": 3,
-        "would": 2,
-        "political": 2,
-        "To": 1,
-        "preserve": 1,
-        "principles": 1,
-        "their": 1,
-        "pupils": 1,
-        "they": 1,
-        "confine": 1,
-        "them": 1,
-        "safe": 1,
-        "elegant": 1,
-        "imbecilities": 1,
-        "classical": 1,
-        "learning.": 1,
-        "A": 1
+        "the": 5,
+        "for": 4,
+        "to": 2,
+        "I": 2,
+        "have": 2,
+        "that": 2,
+        "he": 2,
+        "as": 2,
+        "a": 2,
+        "sense": 2,
+        "Thank": 1,
+        "you": 1,
+        "Bennett,": 1,
+        "who": 1,
+        "was": 1,
+        "best": 1,
+        "company": 1,
+        "could": 1,
+        "asked": 1,
+        "during": 1
     }
 }

@@ -95,15 +95,21 @@ class PythonTypingTestApp: # defines class of GUI
 
     self.display_text = tk.Text(self.root, height=4, font=('Times New Roman',18), wrap='word', bg='#ffffff', fg='#333333', relief='solid', bd=1)
     self.display_text.pack(fill='x', padx=20, pady=10)
+
     self.display_text.config(state='disabled')
+
+    # Text tags for feedback
     self.display_text.tag_config("correct", foreground="green")
     self.display_text.tag_config("incorrect", foreground="red")
+    self.display_text.tag_config("cursor", background="yellow", foreground="black")
 
+    # Hidden input field for capturing keystrokes    
     self.hidden_input = tk.Entry(self.root)
     self.hidden_input.place(x=-1000, y=-1000)  # moves it off-screen
     self.hidden_input.bind("<KeyRelease>", self.on_key_press)
     self.hidden_input.focus_set()
     
+    # Progress bar
     self.progress = ttk.Progressbar(self.root, maximum = 100) # creates progress bar, with 100% as maximum value
     self.progress.pack(fill = 'x', padx=20, pady=(0, 15)) # displayed horizontally (progress bars are generally horizontal)
 
@@ -201,31 +207,40 @@ class PythonTypingTestApp: # defines class of GUI
       typed = typed_text[i]
       tag = "correct" if typed == expected else "incorrect"
       self.display_text.tag_add(tag, f"1.{i}", f"1.{i+1}")
+    
     self.progress['value'] = (min_len / total_char) * 100
     for i in range(len(target_text), len(typed_text)):
       self.display_text.tag_add("incorrect", f"1.{i}", f"1.{i+1}")
       errors += 1
 
-      self.display_text.config(state='disabled')
+    self.display_text.config(state='normal') # temporarily enable to display cursor to show where you are typing
+    self.display_text.tag_remove("cursor", "1.0", "end")  # Remove old cursor tag
+      
+    if len(typed_text) < len(target_text):
+      next_index = len(typed_text)
+      self.display_text.tag_add("cursor", f"1.{next_index}", f"1.{next_index + 1}")
+
+    self.display_text.config(state='disabled')  # Disable again
       
 
-      if typed_text == target_text:
-        self.end_test()
+    if len(typed_text) >= len(target_text):
+      self.end_test()
 
   def end_test(self):
     end_time = time.time()
     full_elapsed = (end_time - self.full_start_time) / 60 if self.full_start_time else 1
     
     #recalculate errors with a 'for' loop here
-  
     typed_text = self.hidden_input.get()
     target_text = self.test
+    
     errors = 0 
     for i in range(len(typed_text)):
       expected = target_text[i]
       typed = typed_text[i]
       if typed != expected:
         errors += 1
+    
     self.total_errors += errors
     self.total_chars += len(self.test)
     self.total_words += len(self.test.split())
@@ -234,8 +249,8 @@ class PythonTypingTestApp: # defines class of GUI
     self.display_text.config(state='disabled')
     self.progress['value'] = 100
 
-    self.results_label.config(text=f"Test Complete! WPM: {final_wpm:.2f} | Total Errors: {self.total_errors}")
-    self.show_results()
+    self.show_results() # show results windows when test ends
+
 
   def show_results(self):
     global wpm_tracker
