@@ -81,7 +81,52 @@ class PythonTypingTestApp: # defines class of GUI
 
     self.setup_widgets() # places the elements of our GUI within the test (detailed in next section of the code)
     self.reset_test() # clears all previous data before (re)starting test
-  
+    self.show_instructions() # shows instructions to user when they first open the test
+
+  # Adding Instruction for the user to the Game (D = Tenzin, O = Ariella)
+  def show_instructions(self):
+    instructions = tk.Toplevel(self.root)
+    instructions.title("Instructions")
+    instructions.geometry("720x680")
+    instructions.grab_set()  # Prevent user from interacting with main window
+
+    # Background frame to make the instructions a bit prettier
+    frame = tk.Frame(instructions, bg="#f4f4f4")
+    frame.pack(fill="both", expand=True, padx=20, pady=20)
+
+    #Title
+    title = tk.Label(frame, text="Instructions", font=("Times New Roman", 30, "bold"), bg="#f4f4f4")
+    title.pack(pady=(20, 10))
+
+    # Instructions text
+    msg_text = (
+        "Welcome to the Python Typing Test!\n\n"
+        "Instructions:\n\n"
+        "1. Select a difficulty level from the dropdown menu.\n"
+        "   ● Easy: Paragraphs with just the English Alphabet and periods.\n"
+        "   ● Medium: Moderate-length passages with basic punctuation.\n"
+        "   ● Hard: Paragraphs with special characters included.\n\n"
+        "2. After choosing a difficulty, please press Restart Test. \n\n"
+        "3. Start typing the paragraph shown in the white box. Your time has now started\n\n"
+        "4. Characters will be highlighted as:\n"
+        "   ● Green: Correct\n"
+        "   ● Red: Incorrect\n"
+        "   ● Yellow: Next character to type\n\n"
+        "5. Progress bar shows your completion.\n\n"
+        "6. The test ends automatically when you've typed all characters and will display your results.\n\n"
+        "7. You can also press End Test at any time to end the test and view your results."
+    )
+
+    msg = tk.Label(frame,text= msg_text,justify="left", wraplength=560,font=("Times New Roman", 15),fg="#333333",bg="#f4f4f4")
+    msg.pack(padx=20, pady=(0, 10))
+
+    # Styled "Start Test" button
+    style = ttk.Style()
+    style.configure("Start.TButton", font=("Times New Roman", 12), padding=6)
+
+    start_btn = ttk.Button(frame, text="Start Test",command=instructions.destroy,style="Start.TButton")
+    start_btn.pack(pady=(10, 20))
+    
   """# Adding Specific Features to GUI (D = Tenzin, Ariella)"""
   def setup_widgets(self): # adds different elements to typing test
     self.root.configure(bg="#4682b4")  # Background color
@@ -123,11 +168,8 @@ class PythonTypingTestApp: # defines class of GUI
     
     self.restart_btn = ttk.Button(self.root, text = "Restart Test", command = self.reset_test, style="Pink.TButton") # user can restart typing test by pressing "Restart Test" button
     self.restart_btn.pack(pady=(5, 20))
-
-    self.results_label = ttk.Label(self.root, text="", font=('Times New Roman', 14), background="#f4f4f4")
-    self.results_label.pack()
   
-  """# Resetting Typing Test (D = Ariella; O = Tenzin)"""
+  """# Resetting Typing Test (D = Ariella, Tenzin)"""
   def reset_test (self): # clears prior attempt and creates fresh test for user after restarting
     global start_time, char_position, errors, total_char # makes sure these variables can be accessed within this function, even though they are created outside the function
     self.paragraphs = retrieve_quotation(num_paragraphs=3, difficulty=self.difficulty.get()) # calls function that retrieves quotation, which gives users a new quotation to type
@@ -152,7 +194,7 @@ class PythonTypingTestApp: # defines class of GUI
     total_char = len(self.test) # tracks total number of characters encountered during new test
     self.progress['value'] = 0 # resets progress bar to 0%
 
-  """ (D = Tenzin; O = Ariella)"""
+  # (D = Tenzin; O = Ariella)
   def load_paragraph(self):
     global char_position, errors, total_char, start_time
 
@@ -226,6 +268,7 @@ class PythonTypingTestApp: # defines class of GUI
     if len(typed_text) >= len(target_text):
       self.end_test()
 
+  #(D = Tenzin, O = Ariella)
   def end_test(self):
     end_time = time.time()
     full_elapsed = (end_time - self.full_start_time) / 60 if self.full_start_time else 1
@@ -251,7 +294,7 @@ class PythonTypingTestApp: # defines class of GUI
 
     self.show_results() # show results windows when test ends
 
-
+  #(D = Ariella, O = Tenzin)
   def show_results(self):
     global wpm_tracker
     
@@ -271,6 +314,7 @@ class PythonTypingTestApp: # defines class of GUI
     self.plot_heatmap(result)
     self.save_typing_analysis()
 
+  #(D = Ariella, O = Tenzin)
   def plot_error_rate_chart(self, parent):
     fig, ax = plt.subplots(figsize=(5, 3))
     keys = list(character_mistype.keys())
@@ -282,6 +326,7 @@ class PythonTypingTestApp: # defines class of GUI
     fig.canvas.manager.set_window_title("Error Analysis")
     plt.show()
 
+  #(D = Ariella, O = Tenzin)
   def plot_heatmap(self, parent):
     heat_data = [[0]*10 for _ in range(5)]
     for char, count in character_mistype.items():
@@ -296,6 +341,7 @@ class PythonTypingTestApp: # defines class of GUI
     plt.tight_layout()
     plt.show()
 
+  #(D = Ariella, O = Tenzin)
   def save_typing_analysis(self):
     print(word_counter)
     print(word_counter.most_common(20))
@@ -307,6 +353,7 @@ class PythonTypingTestApp: # defines class of GUI
     with open("typing_analysis.json", "w") as f:
       json.dump(analysis_data, f, indent=4)
 
+  #(D = Tenzin, O = Ariella)
 # Run the GUI
 if __name__ == "__main__":
   root = tk.Tk()

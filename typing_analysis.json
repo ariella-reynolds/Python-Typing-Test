@@ -1,15 +1,16 @@
 {
     "common_errors": {
-        "T": 1,
-        "h": 2,
-        "n": 1,
+        "l": 3,
+        "y": 3,
+        "m": 2,
         "a": 3,
-        "I": 3,
-        "c": 1,
-        "o": 2,
-        "d": 3,
+        ".": 1,
         "u": 2,
-        "t": 3
+        "i": 4,
+        "n": 1,
+        "t": 1,
+        "s": 3,
+        " ": 1
     },
     "proximity_map": {
         "a": [
@@ -176,25 +177,25 @@
         ]
     },
     "common_words": {
-        "the": 5,
-        "for": 4,
+        "They": 3,
+        "over": 2,
         "to": 2,
-        "I": 2,
-        "have": 2,
-        "that": 2,
-        "he": 2,
-        "as": 2,
-        "a": 2,
-        "sense": 2,
-        "Thank": 1,
-        "you": 1,
-        "Bennett,": 1,
-        "who": 1,
-        "was": 1,
-        "best": 1,
-        "company": 1,
-        "could": 1,
-        "asked": 1,
-        "during": 1
+        "they": 2,
+        "out": 2,
+        "the": 2,
+        "could": 2,
+        "not": 2,
+        "It": 1,
+        "will": 1,
+        "all": 1,
+        "be": 1,
+        "soon.": 1,
+        "tried": 1,
+        "reassure": 1,
+        "themselves": 1,
+        "at": 1,
+        "night": 1,
+        "when": 1,
+        "looked": 1
     }
 }
