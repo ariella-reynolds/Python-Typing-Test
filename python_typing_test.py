@@ -95,7 +95,7 @@ class PythonTypingTestApp: # defines class of GUI
     frame.pack(fill="both", expand=True, padx=20, pady=20)
 
     #Title
-    title = tk.Label(frame, text="Instructions", font=("Times New Roman", 30, "bold"), bg="#f4f4f4")
+    title = tk.Label(frame, text="Instructions", font=("Optima", 30, "bold"), bg="#f4f4f4")
     title.pack(pady=(20, 10))
 
     # Instructions text
@@ -106,7 +106,7 @@ class PythonTypingTestApp: # defines class of GUI
         "   ● Easy: Paragraphs with just the English Alphabet and periods.\n"
         "   ● Medium: Moderate-length passages with basic punctuation.\n"
         "   ● Hard: Paragraphs with special characters included.\n\n"
-        "2. After choosing a difficulty, please press Restart Test. \n\n"
+        "2. After changing a difficulty level, please press Restart Test. \n\n"
         "3. Start typing the paragraph shown in the white box. Your time has now started\n\n"
         "4. Characters will be highlighted as:\n"
         "   ● Green: Correct\n"
@@ -117,28 +117,40 @@ class PythonTypingTestApp: # defines class of GUI
         "7. You can also press End Test at any time to end the test and view your results."
     )
 
-    msg = tk.Label(frame,text= msg_text,justify="left", wraplength=560,font=("Times New Roman", 15),fg="#333333",bg="#f4f4f4")
+    msg = tk.Label(frame,text= msg_text,justify="left", wraplength=560,font=("Baskerville", 15),fg="#333333",bg="#f4f4f4")
     msg.pack(padx=20, pady=(0, 10))
 
-    # Styled "Start Test" button
+    # Styled a Button 
     style = ttk.Style()
-    style.configure("Start.TButton", font=("Times New Roman", 12), padding=6)
+    style.theme_use("clam")
+    style.configure("Red.TButton", background="#8B0000",foreground="#F5E6C4", font=('Baskerville', 14, 'bold'),padding=6)
 
-    start_btn = ttk.Button(frame, text="Start Test",command=instructions.destroy,style="Start.TButton")
+    # Hover (active) style
+    style.map("Red.TButton",
+    background=[("active", "#A97142")])  # Warm Bronze color for Hover
+
+    start_btn = ttk.Button(frame, text="Start Test",command=instructions.destroy,style="Red.TButton")
     start_btn.pack(pady=(10, 20))
     
   """# Adding Specific Features to GUI (D = Tenzin, Ariella)"""
   def setup_widgets(self): # adds different elements to typing test
-    self.root.configure(bg="#4682b4")  # Background color
+    self.root.configure(bg="#E7DCC7")  # Background color
 
-    heading = tk.Label(self.root, text="Python Typing Test", font=('Times New Roman', 24, 'bold'), bg="#fda4ba", fg="#fffffd")
+    # Title and Subheading
+    heading = tk.Label(self.root, text="Typing Test", font=('Times New Roman', 45, 'bold'), fg="#1A1A2E", background="#E7DCC7") # creates title of typing test
     heading.pack(pady=(20, 10))
+    subheading = tk.Label(self.root, text="CLPS0950: Final Project by Tenzin Diki and Ariella Reynolds",font=('Baskerville', 16), fg="#3B4C66", background="#E7DCC7")
+    subheading.pack(pady=(0, 20))
+
+    note = tk.Label(self.root, text="Passages sourced from Babel by R.F. Kuang",font=('Baskerville', 16,), fg="#3B4C66", background="#E7DCC7")
+    note.pack(side='bottom', pady=10)
+
 
     self.difficulty = tk.StringVar(value = "medium") # stores difficulty level, with medium difficulty level as default
-    ttk.Label(self.root, text="Select Difficulty:", font=('Times New Roman', 14), background="#f4f4f4").pack(pady=(20, 5)) # labels difficulty level selection window ("Difficulty:")
+    ttk.Label(self.root, text="Select Difficulty:", font=('Baskerville', 18), background ='#E7DCC7', foreground ='#1A1A2E').pack(pady=(20, 5)) # labels difficulty level selection window ("Difficulty:")
     ttk.Combobox(self.root, textvariable = self.difficulty, values = ["easy","medium","hard"]).pack() # allows user to select difficulty (either "easy," "medium," or "hard") through a dropdown option
 
-    self.display_text = tk.Text(self.root, height=4, font=('Times New Roman',18), wrap='word', bg='#ffffff', fg='#333333', relief='solid', bd=1)
+    self.display_text = tk.Text(self.root, height=7, font=('Baskerville',18), wrap='word', bg='#FFFFFF', fg='#1A1A2E', relief='solid', bd=1)
     self.display_text.pack(fill='x', padx=20, pady=10)
 
     self.display_text.config(state='disabled')
@@ -155,18 +167,18 @@ class PythonTypingTestApp: # defines class of GUI
     self.hidden_input.focus_set()
     
     # Progress bar
-    self.progress = ttk.Progressbar(self.root, maximum = 100) # creates progress bar, with 100% as maximum value
-    self.progress.pack(fill = 'x', padx=20, pady=(0, 15)) # displayed horizontally (progress bars are generally horizontal)
-
-    # Custom styled pink button
+    # Style for the progress bar
     style = ttk.Style()
     style.theme_use("clam")
-    style.configure("Pink.TButton", background="#fda4ba", foreground="white", font=('Times New Roman', 14, 'bold'), padding=6)
+    style.configure("OxfordInk.Horizontal.TProgressbar", thickness=20, troughcolor="#1A1A2E", background="#C0C0C0") # sets color of progress bar to blue
 
-    self.end_btn = ttk.Button(self.root, text="End Test", command=self.end_test, style="Pink.TButton")
+    self.progress = ttk.Progressbar(self.root, maximum = 100, style = "OxfordInk.Horizontal.TProgressbar") 
+    self.progress.pack(fill = 'x', padx=20, pady=(0, 15)) # displayed horizontally (progress bars are generally horizontal)
+
+    self.end_btn = ttk.Button(self.root, text="End Test", command=self.end_test, style="Red.TButton")
     self.end_btn.pack(pady=(5, 20))
     
-    self.restart_btn = ttk.Button(self.root, text = "Restart Test", command = self.reset_test, style="Pink.TButton") # user can restart typing test by pressing "Restart Test" button
+    self.restart_btn = ttk.Button(self.root, text = "Restart Test", command = self.reset_test, style="Red.TButton") # user can restart typing test by pressing "Restart Test" button
     self.restart_btn.pack(pady=(5, 20))
   
   """# Resetting Typing Test (D = Ariella, Tenzin)"""
@@ -359,3 +371,4 @@ if __name__ == "__main__":
   root = tk.Tk()
   app = PythonTypingTestApp(root)
   root.mainloop()
+
