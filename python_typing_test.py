@@ -5,21 +5,13 @@ import tkinter as tk
 from tkinter import ttk
 import pygame
 import json
-import requests
-#import math
-#import threading
-#import os
 import random
 import time
 from collections import defaultdict, Counter
 import matplotlib.pyplot as plt
-#from scipy.io import wavfile
-#from IPython.display import Audio, display
-
 
 # Setting Up Test (Initialization)
 # (D = Ariella; O = Tenzin)
-
 pygame.mixer.init() # initializes pygame mixer, which creates sound effects within typing test
 try:
   key_sound = pygame.mixer.Sound('type.wav') # loads file that provides sound effects (key tapping sounds as user types)
@@ -43,7 +35,7 @@ try:
     with open("typing_passages.json", "r", encoding="utf-8") as f:
         LOCAL_PASSAGES = json.load(f).get("passages", [])
 except (FileNotFoundError, json.JSONDecodeError):
-    LOCAL_PASSAGES = []
+    LOCAL_PASSAGES = {"easy": [], "medium": [], "hard": []}
 
 # Built-in fallback passages if JSON is missing or broken
 FALLBACK_PASSAGES = [
@@ -53,17 +45,18 @@ FALLBACK_PASSAGES = [
     "This is a fallback passage, used when your local text file can't be found."
 ]
 
-def retrieve_quotation(num_paragraphs=3):
+def retrieve_quotation(num_paragraphs=3, difficulty="medium"):
     global word_counter
-    if LOCAL_PASSAGES:
-      string1 = random.sample(LOCAL_PASSAGES, k=num_paragraphs)[0].replace('‘', '\'').replace('’', '\'')
-      string1 = string1.replace('–', '-')[:10]
-      word_counter = Counter(string1.split(" "))
-      print()
-      print(string1)
-      return [string1,]
-    else:
-      return random.sample(FALLBACK_PASSAGES, k=num_paragraphs)
+
+    suitable_passages = LOCAL_PASSAGES.get(difficulty, [])
+    
+    if not suitable_passages:
+        suitable_passages = FALLBACK_PASSAGES
+
+    selected_passage = random.choice(suitable_passages).replace('‘', '\'').replace('’', '\'').replace('–', '-')
+    word_counter = Counter(selected_passage.split(" "))
+    
+    return [selected_passage]
 
 """# Establishing Proximity of Letters (Relative to Each Other)
 (D = Ariella; O = Tenzin) """
@@ -76,7 +69,7 @@ class PythonTypingTestApp: # defines class of GUI
   def __init__(self,root): # initializes new objects within the class
     self.root = root # sets up and saves main window of typing test
     self.root.title("Python Typing Test") # creates title of typing test
-    self.root.geometry('1920x1080') # specifies size of window
+    self.root.geometry('1020x720') # specifies size of window
 
     #multi-stage tracking variables
     self.paragraphs = []
@@ -131,7 +124,7 @@ class PythonTypingTestApp: # defines class of GUI
   """# Resetting Typing Test (D = Ariella; O = Tenzin)"""
   def reset_test (self): # clears prior attempt and creates fresh test for user after restarting
     global start_time, char_position, errors, total_char # makes sure these variables can be accessed within this function, even though they are created outside the function
-    self.paragraphs = retrieve_quotation(num_paragraphs=3) # calls function that retrieves quotation, which gives users a new quotation to type
+    self.paragraphs = retrieve_quotation(num_paragraphs=3, difficulty=self.difficulty.get()) # calls function that retrieves quotation, which gives users a new quotation to type
     self.current_index = 0
     self.total_errors = 0
     self.total_chars = 0

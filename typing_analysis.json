@@ -1,8 +1,8 @@
 {
     "common_errors": {
-        "h": 1,
-        "a": 1,
-        "t": 1
+        "p": 1,
+        "r": 1,
+        "n": 3
     },
     "proximity_map": {
         "a": [
@@ -169,8 +169,25 @@
         ]
     },
     "common_words": {
-        "'That": 1,
-        "and": 1,
-        "": 1
+        "and": 5,
+        "to": 4,
+        "the": 3,
+        "of": 3,
+        "would": 2,
+        "political": 2,
+        "To": 1,
+        "preserve": 1,
+        "principles": 1,
+        "their": 1,
+        "pupils": 1,
+        "they": 1,
+        "confine": 1,
+        "them": 1,
+        "safe": 1,
+        "elegant": 1,
+        "imbecilities": 1,
+        "classical": 1,
+        "learning.": 1,
+        "A": 1
     }
 }
