@@ -18,6 +18,8 @@ try:
 except Exception as e:
   print(f"Sound loading error: {e}")
   key_sound = None
+key_sound.set_volume(0.3)
+key_sound.play(loops=-1)     # Sound effect on keypress
 
 # Global Variables
 start_time = None # tracks elapsed time (starts at 0)
@@ -205,6 +207,25 @@ class PythonTypingTestApp: # defines class of GUI
     errors = 0 # resets number of mistakes made by user to 0
     total_char = len(self.test) # tracks total number of characters encountered during new test
     self.progress['value'] = 0 # resets progress bar to 0%
+    wpm_tracker.clear()
+
+    self.update_stats()  # Begin tracking WPM
+
+  def update_stats(self):
+    global start_time, wpm_tracker
+    if not start_time:
+      start_time = time.time()
+    current_time = time.time()
+    elapsed_minutes = (current_time - start_time) / 60  # Calculate elapsed time in minutes
+    typed = self.hidden_input.get().split()  # Get the typed words from hidden input field
+    if elapsed_minutes > 0:
+        wpm = len(typed) / elapsed_minutes  # Calculate WPM
+        wpm_tracker.append(wpm)  # Store the WPM in the list
+
+    # Re-call this function every 1000 milliseconds (1 second) to keep updating WPM
+    self.root.after(1000, self.update_stats)  # Update every second
+
+    self.update_stats()
 
   # (D = Tenzin; O = Ariella)
   def load_paragraph(self):
@@ -235,17 +256,11 @@ class PythonTypingTestApp: # defines class of GUI
     typed_text = self.hidden_input.get()
     target_text = self.test
 
-    # Sound effect on keypress
-    key_sound.play()
-
     # Temporarily enable display to apply tags
     self.display_text.config(state='normal')
     self.display_text.tag_remove("correct", "1.0", "end")
     self.display_text.tag_remove("incorrect", "1.0", "end")
     self.display_text.config(state='disabled')
-
-    #self.hidden_input.delete(0, 'end')
-    #self.hidden_input.focus_set()
 
     min_len = min(len(typed_text), len(target_text))
     errors = 0
@@ -308,22 +323,23 @@ class PythonTypingTestApp: # defines class of GUI
 
   #(D = Ariella, O = Tenzin)
   def show_results(self):
-    global wpm_tracker
+    global wpm_tracker  # Access the global WPM tracker
     
     time_taken = time.time() - self.full_start_time if self.full_start_time else 1
-    wpm = (self.total_words / time_taken) * 60
+    wpm = (self.total_words / time_taken) * 60  # Calculate WPM for this test
     accuracy = ((self.total_chars - self.total_errors) / self.total_chars) * 100 if self.total_chars else 0
-    wpm_tracker.append(wpm)
+
+    highest_speed = max(wpm_tracker) if wpm_tracker else 0  # Get the highest WPM from the list
+    average_speed = sum(wpm_tracker) / len(wpm_tracker) if wpm_tracker else 0  # Get the average WPM from the list
 
     result = tk.Toplevel(self.root)
     result.title("Results")
     ttk.Label(result, text=f"WPM: {wpm:.2f}").pack()
     ttk.Label(result, text=f"Accuracy: {accuracy:.2f}%").pack()
-    ttk.Label(result, text=f"Highest Speed: {max(wpm_tracker):.2f} WPM").pack()
-    ttk.Label(result, text=f"Average Speed: {sum(wpm_tracker)/len(wpm_tracker):.2f} WPM").pack()
+    ttk.Label(result, text=f"Highest Speed: {highest_speed:.2f} WPM").pack()
+    ttk.Label(result, text=f"Average Speed: {average_speed:.2f} WPM").pack()
 
     self.plot_error_rate_chart(result)
-    self.plot_heatmap(result)
     self.save_typing_analysis()
 
   #(D = Ariella, O = Tenzin)
@@ -339,24 +355,7 @@ class PythonTypingTestApp: # defines class of GUI
     plt.show()
 
   #(D = Ariella, O = Tenzin)
-  def plot_heatmap(self, parent):
-    heat_data = [[0]*10 for _ in range(5)]
-    for char, count in character_mistype.items():
-      row = ord(char.lower()) // 10 % 5
-      col = ord(char.lower()) % 10
-      heat_data[row][col] = count
-      
-    fig, ax = plt.subplots()
-    cax = ax.imshow(heat_data, cmap='Reds', interpolation='nearest')
-    ax.set_title("Typing Error Heatmap")
-    fig.colorbar(cax)
-    plt.tight_layout()
-    plt.show()
-
-  #(D = Ariella, O = Tenzin)
   def save_typing_analysis(self):
-    print(word_counter)
-    print(word_counter.most_common(20))
     analysis_data = {
        "common_errors": dict(character_mistype),
        "proximity_map": keyboard_proximity,
