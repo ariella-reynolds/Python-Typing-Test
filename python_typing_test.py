@@ -19,7 +19,7 @@ except Exception as e:
   print(f"Sound loading error: {e}")
   key_sound = None
 key_sound.set_volume(0.3)
-key_sound.play(loops=-1)     # Sound effect on keypress
+key_sound.play(loops=-1)  
 
 # Global Variables
 start_time = None # tracks elapsed time (starts at 0)
@@ -214,7 +214,8 @@ class PythonTypingTestApp: # defines class of GUI
   def update_stats(self):
     global start_time, wpm_tracker
     if not start_time:
-      start_time = time.time()
+        start_time = time.time()
+
     current_time = time.time()
     elapsed_minutes = (current_time - start_time) / 60  # Calculate elapsed time in minutes
     typed = self.hidden_input.get().split()  # Get the typed words from hidden input field
@@ -222,10 +223,8 @@ class PythonTypingTestApp: # defines class of GUI
         wpm = len(typed) / elapsed_minutes  # Calculate WPM
         wpm_tracker.append(wpm)  # Store the WPM in the list
 
-    # Re-call this function every 1000 milliseconds (1 second) to keep updating WPM
-    self.root.after(1000, self.update_stats)  # Update every second
-
-    self.update_stats()
+    # Schedule this method to run again after 1 second
+    self.root.after(1000, self.update_stats)
 
   # (D = Tenzin; O = Ariella)
   def load_paragraph(self):
@@ -334,7 +333,7 @@ class PythonTypingTestApp: # defines class of GUI
 
     result = tk.Toplevel(self.root)
     result.title("Results")
-    ttk.Label(result, text=f"WPM: {wpm:.2f}").pack()
+    ttk.Label(result, text=f"Final WPM: {wpm:.2f}").pack()
     ttk.Label(result, text=f"Accuracy: {accuracy:.2f}%").pack()
     ttk.Label(result, text=f"Highest Speed: {highest_speed:.2f} WPM").pack()
     ttk.Label(result, text=f"Average Speed: {average_speed:.2f} WPM").pack()
