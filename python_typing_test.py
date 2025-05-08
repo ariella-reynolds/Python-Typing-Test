@@ -111,8 +111,8 @@ class PythonTypingTestApp: # defines class of GUI
         "   ● Green: Correct\n"
         "   ● Red: Incorrect\n"
         "   ● Yellow: Next character to type\n\n"
-        "5. Progress bar shows your completion.\n\n"
-        "6. The test ends automatically when you've typed all characters and will display your results.\n\n"
+        "5. The progress bar shows your completion.\n\n"
+        "6. The test ends automatically when you've typed all characters. It will display your results.\n\n"
         "7. You can also press End Test at any time to end the test and view your results."
     )
     msg = tk.Label(frame,text= msg_text,justify="left", wraplength=560,font=("Baskerville", 15),fg="#333333",bg="#f4f4f4") 
