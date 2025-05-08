@@ -331,7 +331,7 @@ class PythonTypingTestApp: # defines class of GUI
     # Display all results in a unified window
     dashboard = tk.Toplevel(self.root) # creates a new top-level window (subwindow) for displaying results
     dashboard.title("Typing Test Results Dashboard") # sets the title of the results window
-    dashboard.geometry("1200x900")  # sets the size of the results window
+    dashboard.geometry("1250x900")  # sets the size of the results window
     dashboard.configure(bg="#1A1A2E") # sets background color to match the main window
 
     # Header for the dashboard
@@ -349,9 +349,9 @@ class PythonTypingTestApp: # defines class of GUI
 
     # Subheading for the charts
     chart_description = tk.Label(dashboard, text="Performance Analysis", font=('Baskerville', 20, 'bold'), pady=5, fg="#E7DCC7", bg="#1A1A2E")
-    chart_description.pack(pady=(40, 5)) # adds space between the stats and the chart description
+    chart_description.pack(pady=(30, 0)) # adds space between the stats and the chart description
     chart_info = tk.Label(dashboard, text="The following charts display your typing accuracy and error distribution. Please use these insights to improve your typing skills.", font=('Baskerville', 14), wraplength=800, fg="#E7DCC7", bg="#1A1A2E")
-    chart_info.pack()
+    chart_info.pack(pady=(10, 20))
 
     # Charts Frame
     charts_frame = tk.Frame(dashboard, padx=10, pady=10) # creates a frame for the charts
