@@ -18,8 +18,7 @@ try:
 except Exception as e: # if sound doesn't work
   print(f"Sound loading error: {e}")
   key_sound = None
-key_sound.set_volume(0.3) # lowers volume of sound
-key_sound.play(loops=-1)  # loops sound indefinitely
+key_sound.set_volume(0.3) # lowers volume of sounds 
 
 # Global Variables (D = Tenzin; O = Ariella); used mainly for constants
 start_time = None # tracks elapsed time (starts at 0)
@@ -69,6 +68,7 @@ class PythonTypingTestApp: # defines class of GUI
     self.root = root # sets up and saves main window of typing test
     self.root.title("Python Typing Test") # creates title of typing test
     self.root.geometry('1020x720') # specifies size of window
+    self.sound_started = False # Initializes sound effect variable
 
     # multi-stage tracking variables (used within GUI class, along with global variables; also used mainly for evolving values)
     self.paragraphs = [] # holds text to be typed by user
@@ -232,10 +232,16 @@ class PythonTypingTestApp: # defines class of GUI
     self.display_text.config(state='normal') # temporarily allows text display to be edited
     self.display_text.delete('1.0', 'end') # clears text display
     self.display_text.insert('1.0', self.test) # provides user with new text display
-   
+
   # Indicates What Happens When a User Presses a Key (D = Tenzin; O = Ariella)
   def on_key_press(self, event): # methods controls what happens when a user presses a key
     global start_time, char_position, errors, total_char
+
+    # Start the sound only when the user types the first character
+    if not self.sound_started:
+      if key_sound:
+        key_sound.play(loops=-1)  # Start sound when typing begins
+        self.sound_started = True  # Set the flag to indicate that sound has started
     
     if not start_time: # if user hasn't started typing
       start_time = time.time() # start time is the current time when the user hasn't started typing
@@ -284,6 +290,10 @@ class PythonTypingTestApp: # defines class of GUI
 
   # Post-Test Calculations (D = Tenzin, O = Ariella)
   def end_test(self): # after the test ends
+    if self.sound_started:  # Check if sound is playing
+        key_sound.stop()  # Stop the sound when the test ends
+        self.sound_started = False  # Reset the flag
+    
     end_time = time.time() # end time is the current time when the user has finished typing
     full_elapsed = (end_time - self.full_start_time) / 60 if self.full_start_time else 1 # calculates total time (in minutes) spent on typing test (set as one minute in case time was not calculated properly)
     
