@@ -323,97 +323,102 @@ class PythonTypingTestApp: # defines class of GUI
   def show_results(self):
     global wpm_tracker
     
-    time_taken = time.time() - self.full_start_time if self.full_start_time else 1
-    wpm = (self.total_words / time_taken) * 60
-    accuracy = ((self.total_chars - self.total_errors) / self.total_chars) * 100 if self.total_chars else 0
+    time_taken = time.time() - self.full_start_time if self.full_start_time else 1 # computes elapsed time in seconds, or sets to 1 to avoid division by zero
+    wpm = (self.total_words / time_taken) * 60 # calculates WPM
+    accuracy = ((self.total_chars - self.total_errors) / self.total_chars) * 100 if self.total_chars else 0  # computes accuracy based on the number of correct characters typed
     wpm_tracker.append(wpm)
 
     # Display all results in a unified window
-    dashboard = tk.Toplevel(self.root)
-    dashboard.title("Typing Test Results Dashboard")
-    dashboard.geometry("1200x900")
-    dashboard.configure(bg="#1A1A2E")
+    dashboard = tk.Toplevel(self.root) # creates a new top-level window (subwindow) for displaying results
+    dashboard.title("Typing Test Results Dashboard") # sets the title of the results window
+    dashboard.geometry("1200x900")  # sets the size of the results window
+    dashboard.configure(bg="#1A1A2E") # sets background color to match the main window
 
     # Header for the dashboard
     header = tk.Label(dashboard, text="Typing Test Results", font=('Baskerville', 20, 'bold'), pady=10, foreground="#E7DCC7", bg = "#1A1A2E")
-    header.pack()
+    header.pack() # places the header at the top of the results window
 
     #Stas Frame
-    stats_frame = tk.Frame(dashboard, padx=10, pady=10, bg="#E7DCC7")
+    stats_frame = tk.Frame(dashboard, padx=10, pady=10, bg="#E7DCC7")  # creates a frame for statistics with padding and background color
     stats_frame.pack()
 
-    tk.Label(stats_frame, text=f"WPM: {wpm:.2f}", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=0, column=0, padx=5, pady=2)
-    tk.Label(stats_frame, text=f"Accuracy: {accuracy:.2f}%", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=1, column=0, padx=5, pady=2)
-    tk.Label(stats_frame, text=f"Highest Speed: {max(wpm_tracker):.2f} WPM", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=2, column=0, padx=5, pady=2)
-    tk.Label(stats_frame, text=f"Average Speed: {sum(wpm_tracker)/len(wpm_tracker):.2f} WPM", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=3, column=0, padx=5, pady=2)
+    tk.Label(stats_frame, text=f"WPM: {wpm:.2f}", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=0, column=0, padx=5, pady=2) # WPM label
+    tk.Label(stats_frame, text=f"Accuracy: {accuracy:.2f}%", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=1, column=0, padx=5, pady=2) # Accuracy label
+    tk.Label(stats_frame, text=f"Highest Speed: {max(wpm_tracker):.2f} WPM", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=2, column=0, padx=5, pady=2) # Highest Speed label
+    tk.Label(stats_frame, text=f"Average Speed: {sum(wpm_tracker)/len(wpm_tracker):.2f} WPM", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=3, column=0, padx=5, pady=2) # Average Speed label
 
     # Subheading for the charts
     chart_description = tk.Label(dashboard, text="Performance Analysis", font=('Baskerville', 20, 'bold'), pady=5, fg="#E7DCC7", bg="#1A1A2E")
-    chart_description.pack(pady=(40, 5))
-
+    chart_description.pack(pady=(40, 5)) # adds space between the stats and the chart description
     chart_info = tk.Label(dashboard, text="The following charts display your typing accuracy and error distribution. Please use these insights to improve your typing skills.", font=('Baskerville', 14), wraplength=800, fg="#E7DCC7", bg="#1A1A2E")
     chart_info.pack()
 
     # Charts Frame
-    charts_frame = tk.Frame(dashboard, padx=10, pady=10)
+    charts_frame = tk.Frame(dashboard, padx=10, pady=10) # creates a frame for the charts
     charts_frame.pack()
 
     # Embed Error Rate Chart
-    error_chart_canvas = FigureCanvasTkAgg(self.plot_error_rate_chart(), master=charts_frame)
-    error_chart_canvas.draw()
-    error_chart_canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5)
+    error_chart_canvas = FigureCanvasTkAgg(self.plot_error_rate_chart(), master=charts_frame)  # attaches error chart to the frame
+    error_chart_canvas.draw() # renders the chart on the canvas
+    error_chart_canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5) # positions chart in the first column
 
     # Embed Heatmap Chart
-    heatmap_canvas = FigureCanvasTkAgg(self.plot_heatmap(), master=charts_frame)
-    heatmap_canvas.draw()
-    heatmap_canvas.get_tk_widget().grid(row=0, column=1, padx=5, pady=5)
+    heatmap_canvas = FigureCanvasTkAgg(self.plot_heatmap(), master=charts_frame) # attaches heatmap to the frame
+    heatmap_canvas.draw() # renders the heatmap on the canvas
+    heatmap_canvas.get_tk_widget().grid(row=0, column=1, padx=5, pady=5)  # positions chart in the second column
 
     # Close Button
-    close_btn = ttk.Button(dashboard, text="Close", command=dashboard.destroy, style="Red.TButton")
-    close_btn.pack(pady=(10, 20))
+    close_btn = ttk.Button(dashboard, text="Close", command=dashboard.destroy, style="Red.TButton") # creates a close button styled with the theme
+    close_btn.pack(pady=(10, 20)) # places the button at the bottom of the results window with padding
     
     # Show the dashboard
-    dashboard.grab_set()  
-    dashboard.focus_set()
-    dashboard.transient(self.root)
-    dashboard.protocol("WM_DELETE_WINDOW", dashboard.destroy)
+    dashboard.grab_set()  # makes the dashboard the active window
+    dashboard.focus_set() # sets focus to the dashboard to capture user input
+    dashboard.transient(self.root) # keeps the dashboard on top of the main application window
+    dashboard.protocol("WM_DELETE_WINDOW", dashboard.destroy) # sets the close operation to properly destroy the window
 
-  #(D = Ariella, O = Tenzin)
-  def plot_error_rate_chart(self):
-    fig, ax = plt.subplots(figsize=(6, 4))
-    keys = list(character_mistype.keys())
-    values = [character_mistype[k] for k in keys]
+  #(D = Ariella, Tenzin)
+  def plot_error_rate_chart(self): # plots a bar chart to show the frequency of typing errors
+    fig, ax = plt.subplots(figsize=(6, 4)) # creates a figure and a single subplot with specified size
     
+    # Extracts the characters that were mistyped and their respective counts
+    keys = list(character_mistype.keys()) # list of characters that were mistyped
+    values = [character_mistype[k] for k in keys] # list of error counts corresponding to each mistyped character
+    
+    # Handles the case where no errors were recorded
     if not keys:  
-      ax.text(0.5, 0.5, "No Errors", ha='center', va='center', fontsize=14, color="#3B4C66")
-      ax.set_title("No Typing Errors Recorded", fontweight='bold', fontsize=14)
+      ax.text(0.5, 0.5, "No Errors", ha='center', va='center', fontsize=14, color="#3B4C66") # displays message in the center of the chart
+      ax.set_title("No Typing Errors Recorded", fontweight='bold', fontsize=14) # title for the empty error chart
     else: 
-      ax.bar(keys, values, color='#8B0000')
-      ax.set_title("Typing Error Frequency", fontweight='bold', fontsize=14, color="#1A1A2E")
-      ax.set_ylabel("Mistakes", fontsize=8, color="#1A1A2E")
-      ax.set_xlabel("Characters", fontsize=8, color="#1A1A2E")
+      ax.bar(keys, values, color='#8B0000') # red-colored bars representing error frequency
+      ax.set_title("Typing Error Frequency", fontweight='bold', fontsize=14, color="#1A1A2E") # chart title
+      ax.set_ylabel("Mistakes", fontsize=8, color="#1A1A2E") # label for the Y-axis, indicating mistake count
+      ax.set_xlabel("Characters", fontsize=8, color="#1A1A2E") # label for the X-axis, showing the characters
 
-    fig.patch.set_facecolor("#E7DCC7")
-    plt.tight_layout()
-    return fig
+    fig.patch.set_facecolor("#E7DCC7") # sets the background color to match the dashboard theme
+    plt.tight_layout()  # Adjusts layout to prevent overlap of labels and chart elements
+    return fig # returns the completed figure object for embedding in the GUI
 
-  #(D = Ariella, O = Tenzin)
-  def plot_heatmap(self):
-    heat_data = [[0]*10 for _ in range(5)]
+  #(D = Ariella, Tenzin)
+  def plot_heatmap(self): # plots a heatmap showing the frequency of errors made on each keyboard key
+    heat_data = [[0]*10 for _ in range(5)] # 5 rows and 10 columns, simulating a keyboard layout
+   
+    # Fills the heatmap data with the number of errors for each character
     for char, count in character_mistype.items():
-      row = ord(char.lower()) // 10 % 5
-      col = ord(char.lower()) % 10
-      heat_data[row][col] = count
+      row = ord(char.lower()) // 10 % 5 # determines the row based on ASCII value, simulating QWERTY row structure
+      col = ord(char.lower()) % 10 # determines the column within the row
+      heat_data[row][col] = count # sets the error frequency for the specific key in the heatmap
+    
       
-    fig, ax = plt.subplots(figsize=(6, 4))
-    cax = ax.imshow(heat_data, cmap='Reds', interpolation='nearest')
-    ax.set_title("Typing Error Heatmap", fontweight='bold', fontsize=14, color="#1A1A2E")
+    fig, ax = plt.subplots(figsize=(6, 4)) # creates a figure and axis object with a specified size
+    cax = ax.imshow(heat_data, cmap='Reds', interpolation='nearest') # uses 'Reds' colormap to highlight error density
+    ax.set_title("Typing Error Heatmap", fontweight='bold', fontsize=14, color="#1A1A2E") # chart title
     
     # Improving readibility by adding labels and ticks 
-    ax.set_xlabel("Keyboard Columns (Position on Keyboard)", fontsize=8, color="#1A1A2E")
-    ax.set_ylabel("Keyboard Rows (QWERTY Layout)", fontsize=8, color="#1A1A2E")
-    ax.tick_params(axis='x', colors="#3B4C66")
-    ax.tick_params(axis='y', colors="#3B4C66")
+    ax.set_xlabel("Keyboard Columns (Position on Keyboard)", fontsize=8, color="#1A1A2E") # label for X-axis
+    ax.set_ylabel("Keyboard Rows (QWERTY Layout)", fontsize=8, color="#1A1A2E") # label for Y-axis
+    ax.tick_params(axis='x', colors="#3B4C66") # changes tick color on X-axis to match the theme
+    ax.tick_params(axis='y', colors="#3B4C66") # changes tick color on Y-axis to match the theme
 
     # Adding description text
     plt.subplots_adjust(bottom=0.2)  # Add space at the bottom for the description
@@ -422,39 +427,16 @@ class PythonTypingTestApp: # defines class of GUI
        "Darker shades indicate more frequent errors.",
        horizontalalignment='center', fontsize=6, color="#3B4C66")
 
-    fig.colorbar(cax)
+    fig.colorbar(cax) # attaches a colorbar that shows error frequency intensity
 
-    fig.patch.set_facecolor("#E7DCC7")
-    ax.set_facecolor("#E7DCC7")
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
+    # Sets the figure and axis background colors to match the theme
+    fig.patch.set_facecolor("#E7DCC7") # figure background
+    ax.set_facecolor("#E7DCC7") # axis background
+    ax.spines['top'].set_visible(False) # hides the top border for a cleaner look
+    ax.spines['right'].set_visible(False) # hides the right border for a cleaner look
 
-    plt.tight_layout()
-    return fig
-    # adds results window
-    result = tk.Toplevel(self.root) 
-    result.title("Results")
-    ttk.Label(result, text=f"Accuracy: {accuracy:.2f}%").pack()
-    ttk.Label(result, text=f"Final Speed: {wpm:.2f} WPM").pack()
-    ttk.Label(result, text=f"Highest Speed: {highest_speed:.2f} WPM").pack()
-    ttk.Label(result, text=f"Average Speed: {average_speed:.2f} WPM").pack()
-
-    self.plot_error_rate_chart(result) # displays error plot (coded in the next section, directly below)
-
-  # Error Plot (D = Ariella, O = Tenzin) 
-  def plot_error_rate_chart(self, parent): # creates a bar chart that documents all errors made by user during the test
-    fig, ax = plt.subplots(figsize=(5, 3)) # establishes dimensions of chart
-    keys = list(character_mistype.keys()) # keeps track of mistyped characters
-    values = [character_mistype[k] for k in keys] # keeps track of how many times each character was mistyped
-    ax.bar(keys, values)
-    ax.set_title("Typing Error Frequency") # title
-    ax.set_ylabel("Mistakes") # y-axis
-    plt.tight_layout() # modifies spacing to ensure that labels on x- and y-axes do not overlap
-
-    # formatting
-    canvas = FigureCanvasTkAgg(fig, master=parent)
-    canvas.draw()
-    canvas.get_tk_widget().pack()
+    plt.tight_layout() # Adjusts the layout to ensure all elements fit within the figure
+    return fig # returns the completed figure object for embedding in the GUI
 
   # Saves Data on Letter/Word Frequency and Proximity (D = Ariella, O = Tenzin)
   def save_typing_analysis(self): # saves data (described below) to file after test is over
