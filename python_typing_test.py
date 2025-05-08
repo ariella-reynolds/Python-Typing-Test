@@ -326,7 +326,6 @@ class PythonTypingTestApp: # defines class of GUI
     highest_speed = max(wpm_tracker) if wpm_tracker else 0  # calculates the highest wpm achieved during the test
     average_speed = sum(wpm_tracker) / len(wpm_tracker) if wpm_tracker else 0  # calculates the average wpm achieved during the test
     wpm_tracker.append(wpm)
-    self.show_results() # show results windows when test ends
 
     # displays all results in a unified window
     dashboard = tk.Toplevel(self.root) # creates a new top-level window (subwindow) for displaying results
