@@ -6,7 +6,7 @@ def load_text_file(path):
         return f.read()
 
 def categorize_passage(passage):
-    if re.match(r'^[A-Za-z\s\.]+$', passage):
+    if re.match(r'^[A-Za-z\s\.,]+$', passage):
         return 'easy'
     elif re.match(r'^[A-Za-z0-9\s\.,\?!\'\"]+$', passage):
         return 'medium'

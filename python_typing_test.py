@@ -9,6 +9,7 @@ import random
 import time
 from collections import defaultdict, Counter
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Setting Up Test (Initialization)
 # (D = Ariella; O = Tenzin)
@@ -306,7 +307,7 @@ class PythonTypingTestApp: # defines class of GUI
 
     self.show_results() # show results windows when test ends
 
-  #(D = Ariella, O = Tenzin)
+  #(D = Ariella, Tenzin)
   def show_results(self):
     global wpm_tracker
     
@@ -315,43 +316,109 @@ class PythonTypingTestApp: # defines class of GUI
     accuracy = ((self.total_chars - self.total_errors) / self.total_chars) * 100 if self.total_chars else 0
     wpm_tracker.append(wpm)
 
-    result = tk.Toplevel(self.root)
-    result.title("Results")
-    ttk.Label(result, text=f"WPM: {wpm:.2f}").pack()
-    ttk.Label(result, text=f"Accuracy: {accuracy:.2f}%").pack()
-    ttk.Label(result, text=f"Highest Speed: {max(wpm_tracker):.2f} WPM").pack()
-    ttk.Label(result, text=f"Average Speed: {sum(wpm_tracker)/len(wpm_tracker):.2f} WPM").pack()
+    # Display all results in a unified window
+    dashboard = tk.Toplevel(self.root)
+    dashboard.title("Typing Test Results Dashboard")
+    dashboard.geometry("1200x900")
+    dashboard.configure(bg="#1A1A2E")
 
-    self.plot_error_rate_chart(result)
-    self.plot_heatmap(result)
-    self.save_typing_analysis()
+    # Header for the dashboard
+    header = tk.Label(dashboard, text="Typing Test Results", font=('Baskerville', 20, 'bold'), pady=10, foreground="#E7DCC7", bg = "#1A1A2E")
+    header.pack()
+
+    #Stas Frame
+    stats_frame = tk.Frame(dashboard, padx=10, pady=10, bg="#E7DCC7")
+    stats_frame.pack()
+
+    tk.Label(stats_frame, text=f"WPM: {wpm:.2f}", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=0, column=0, padx=5, pady=2)
+    tk.Label(stats_frame, text=f"Accuracy: {accuracy:.2f}%", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=1, column=0, padx=5, pady=2)
+    tk.Label(stats_frame, text=f"Highest Speed: {max(wpm_tracker):.2f} WPM", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=2, column=0, padx=5, pady=2)
+    tk.Label(stats_frame, text=f"Average Speed: {sum(wpm_tracker)/len(wpm_tracker):.2f} WPM", font=('Baskerville', 14), bg="#E7DCC7", fg="#1A1A2E").grid(row=3, column=0, padx=5, pady=2)
+
+    # Subheading for the charts
+    chart_description = tk.Label(dashboard, text="Performance Analysis", font=('Baskerville', 20, 'bold'), pady=5, fg="#E7DCC7", bg="#1A1A2E")
+    chart_description.pack(pady=(40, 5))
+
+    chart_info = tk.Label(dashboard, text="The following charts display your typing accuracy and error distribution. Please use these insights to improve your typing skills.", font=('Baskerville', 14), wraplength=800, fg="#E7DCC7", bg="#1A1A2E")
+    chart_info.pack()
+
+    # Charts Frame
+    charts_frame = tk.Frame(dashboard, padx=10, pady=10)
+    charts_frame.pack()
+
+    # Embed Error Rate Chart
+    error_chart_canvas = FigureCanvasTkAgg(self.plot_error_rate_chart(), master=charts_frame)
+    error_chart_canvas.draw()
+    error_chart_canvas.get_tk_widget().grid(row=0, column=0, padx=5, pady=5)
+
+    # Embed Heatmap Chart
+    heatmap_canvas = FigureCanvasTkAgg(self.plot_heatmap(), master=charts_frame)
+    heatmap_canvas.draw()
+    heatmap_canvas.get_tk_widget().grid(row=0, column=1, padx=5, pady=5)
+
+    # Close Button
+    close_btn = ttk.Button(dashboard, text="Close", command=dashboard.destroy, style="Red.TButton")
+    close_btn.pack(pady=(10, 20))
+    
+    # Show the dashboard
+    dashboard.grab_set()  
+    dashboard.focus_set()
+    dashboard.transient(self.root)
+    dashboard.protocol("WM_DELETE_WINDOW", dashboard.destroy)
 
   #(D = Ariella, O = Tenzin)
-  def plot_error_rate_chart(self, parent):
-    fig, ax = plt.subplots(figsize=(5, 3))
+  def plot_error_rate_chart(self):
+    fig, ax = plt.subplots(figsize=(6, 4))
     keys = list(character_mistype.keys())
     values = [character_mistype[k] for k in keys]
-    ax.bar(keys, values)
-    ax.set_title("Typing Error Frequency")
-    ax.set_ylabel("Mistakes")
+    
+    if not keys:  
+      ax.text(0.5, 0.5, "No Errors", ha='center', va='center', fontsize=14, color="#3B4C66")
+      ax.set_title("No Typing Errors Recorded", fontweight='bold', fontsize=14)
+    else: 
+      ax.bar(keys, values, color='#8B0000')
+      ax.set_title("Typing Error Frequency", fontweight='bold', fontsize=14, color="#1A1A2E")
+      ax.set_ylabel("Mistakes", fontsize=8, color="#1A1A2E")
+      ax.set_xlabel("Characters", fontsize=8, color="#1A1A2E")
+
+    fig.patch.set_facecolor("#E7DCC7")
     plt.tight_layout()
-    fig.canvas.manager.set_window_title("Error Analysis")
-    plt.show()
+    return fig
 
   #(D = Ariella, O = Tenzin)
-  def plot_heatmap(self, parent):
+  def plot_heatmap(self):
     heat_data = [[0]*10 for _ in range(5)]
     for char, count in character_mistype.items():
       row = ord(char.lower()) // 10 % 5
       col = ord(char.lower()) % 10
       heat_data[row][col] = count
       
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(6, 4))
     cax = ax.imshow(heat_data, cmap='Reds', interpolation='nearest')
-    ax.set_title("Typing Error Heatmap")
+    ax.set_title("Typing Error Heatmap", fontweight='bold', fontsize=14, color="#1A1A2E")
+    
+    # Improving readibility by adding labels and ticks 
+    ax.set_xlabel("Keyboard Columns (Position on Keyboard)", fontsize=8, color="#1A1A2E")
+    ax.set_ylabel("Keyboard Rows (QWERTY Layout)", fontsize=8, color="#1A1A2E")
+    ax.tick_params(axis='x', colors="#3B4C66")
+    ax.tick_params(axis='y', colors="#3B4C66")
+
+    # Adding description text
+    plt.subplots_adjust(bottom=0.2)  # Add space at the bottom for the description
+    fig.text(0.5, 0.05, 
+      "The heatmap shows the frequency of errors made on each keyboard key.\n "
+       "Darker shades indicate more frequent errors.",
+       horizontalalignment='center', fontsize=6, color="#3B4C66")
+
     fig.colorbar(cax)
+
+    fig.patch.set_facecolor("#E7DCC7")
+    ax.set_facecolor("#E7DCC7")
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
     plt.tight_layout()
-    plt.show()
+    return fig
 
   #(D = Ariella, O = Tenzin)
   def save_typing_analysis(self):
