@@ -1,7 +1,7 @@
 import json
 import re
 
-# Generating Passages from Babel for Typing Test (D = Tenzin; O = Ariella)
+# Generates Passages from Babel for Typing Test (D = Tenzin; O = Ariella)
 def load_text_file(path): # opens a file given the path provided
     with open(path, 'r', encoding='utf-8') as f: # correctly encodes file to ensure that non-alphanumeric characters are properly displayed
         return f.read() # returns file as a string
