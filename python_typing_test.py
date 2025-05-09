@@ -399,43 +399,46 @@ class PythonTypingTestApp: # defines class of GUI
     return fig # returns the completed figure object for embedding in the GUI
 
   # (D = Ariella, Tenzin; O = Ariella, Tenzin)
-  def plot_heatmap(self): # plots a heatmap showing the frequency of errors made on each keyboard key
-    heat_data = [[0]*10 for _ in range(5)] # 5 rows and 10 columns, simulating a keyboard layout
-   
-    # fills the heatmap data with the number of errors for each character
+  def plot_heatmap(self):
+    # Define the QWERTY keyboard layout as rows of keys
+    qwerty_layout = [
+      ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='],  # Row 0 (number row)
+      ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\\'],  # Row 1 (top letter row)
+      ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', '\''],  # Row 2 (middle letter row)
+      ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/']  # Row 3 (bottom letter row)
+    ]
+
+    # Create a 4x13 matrix (max row length) initialized to zero
+    heat_data = [[0] * 13 for _ in range(4)]
+
+    # Create dictionary mapping each key to its row and column position
+    key_positions = {char: (row_idx, col_idx) for row_idx, row in enumerate(qwerty_layout) for col_idx, char in enumerate(row)}
+
+    # Map errors to the correct row and column based on the keyboard layout
     for char, count in character_mistype.items():
-      row = ord(char.lower()) // 10 % 5 # determines the row based on ASCII value, simulating QWERTY row structure
-      col = ord(char.lower()) % 10 # determines the column within the row
-      heat_data[row][col] = count # sets the error frequency for the specific key in the heatmap
-     
-    fig, ax = plt.subplots(figsize=(6, 4)) # creates a figure and axis object with a specified size
-    cax = ax.imshow(heat_data, cmap='Reds', interpolation='nearest') # uses 'Reds' colormap to highlight error density
-    ax.set_title("Typing Error Heatmap", fontweight='bold', fontsize=14, color="#1A1A2E") # chart title
-    
-    # improves readibility by adding labels and ticks 
-    ax.set_xlabel("Keyboard Columns (Position on Keyboard)", fontsize=8, color="#1A1A2E") # label for x-axis
-    ax.set_ylabel("Keyboard Rows (QWERTY Layout)", fontsize=8, color="#1A1A2E") # label for y-axis
-    ax.tick_params(axis='x', colors="#3B4C66") # changes tick color on x-axis to match the theme
-    ax.tick_params(axis='y', colors="#3B4C66") # changes tick color on y-axis to match the theme
+      pos = key_positions.get(char.upper()) # gets the position of the character from the dictionary
+      if pos: # checks if the character position exists
+        row_idx, col_idx = pos # unpacks the row and column indices
+        heat_data[row_idx][col_idx] = count # updates the heatmap data with the count of errors
 
-    # adds description text
-    plt.subplots_adjust(bottom=0.2)  # adds space at the bottom for the description
-    fig.text(0.5, 0.05, 
-      "The heatmap shows the frequency of errors made on each keyboard key.\n "
-       "Darker shades indicate more frequent errors.",
-       horizontalalignment='center', fontsize=6, color="#3B4C66")
+    # Create the heatmap
+    fig, ax = plt.subplots(figsize=(6, 3))  # sets the figure size for the heatmap
+    cax = ax.imshow(heat_data, cmap='Reds', interpolation='nearest', aspect='auto') # generates the heatmap
+    ax.set_title("Typing Error Heatmap (QWERTY Layout)", fontweight='bold', fontsize=14, color="#1A1A2E") # sets the chart title
 
-    fig.colorbar(cax) # attaches a colorbar that shows error frequency intensity
+    # Set dynamic labels for the heatmap
+    ax.set_xticks(range(13)) # sets x-axis ticks for each column
+    ax.set_xticklabels(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\\']) # labels for x-axis
+    ax.set_yticks(range(4)) # sets y-axis ticks for each row
+    ax.set_yticklabels(['Numbers', 'Top Row', 'Middle Row', 'Bottom Row']) # labels for y-axis
+    fig.colorbar(cax) # adds a color bar to indicate intensity
 
-    # sets the figure and axis background colors to match the theme
-    fig.patch.set_facecolor("#E7DCC7") # figure background
-    ax.set_facecolor("#E7DCC7") # axis background
-    ax.spines['top'].set_visible(False) # hides the top border for a cleaner look
-    ax.spines['right'].set_visible(False) # hides the right border for a cleaner look
-
-    plt.tight_layout() # adjusts the layout to ensure all elements fit within the figure
-    return fig # returns the completed figure object for embedding in the GUI
-
+    # Style tweaks for consistent visual appearance
+    fig.patch.set_facecolor("#E7DCC7") # sets background color for the figure
+    ax.set_facecolor("#E7DCC7") # sets background color for the axes
+    plt.tight_layout() # adjusts layout to fit everything properly
+    return fig
+  
   # Saves Data on Letter/Word Frequency and Proximity (D = Ariella, O = Tenzin)
   def save_typing_analysis(self): # saves data (described below) to file after test is over
     analysis_data = {
