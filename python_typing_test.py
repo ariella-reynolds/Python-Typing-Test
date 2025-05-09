@@ -47,19 +47,12 @@ def retrieve_quotation(num_paragraphs=3, difficulty="medium"): # obtains passage
     global word_counter
 
     suitable_passages = LOCAL_PASSAGES.get(difficulty, []) # retrieves a selection of passages that fit the criteria in the function above
-    
     if not suitable_passages: # if there is no passage found with the necessary criteria, as defined above, the test offers the user a default option
         suitable_passages = FALLBACK_PASSAGES
 
     selected_passage = random.choice(suitable_passages).replace('‘', '\'').replace('’', '\'').replace('–', '-') # randomly picks passage from selection of passages with the necessary criteria ("suitable_passages") and ensures that users are able to type certain non-alphanumeric characters accurately
     word_counter = Counter(selected_passage.split(" ")) # counts number of words in the passage for post-test word frequency analysis
-    
     return [selected_passage] 
-
-# Establishes Proximity of Letters (Relative to Each Other) (D = Ariella; O = Tenzin)
-keyboard_proximity = { # two letters were considered close to each other -- i.e., in near proximity -- when they were adjacent to each other, whether horizontally, vertically, or diagonally
-    'a':['q','w','s','z'],'s':['a','w','e','d','x','z'],'d':['s','e','r','f','c','x'],'f':['d','r','t','g','v','c'],'g':['f','t','y','h','b','v'],'h':['g','y','u','j','n','b'],'j':['h','u','i','k','m','n'],'k':['j','i','o','l','m'],'l':['k','o','p'],'q':['w','a'],'w':['q','e','s','a'],'e':['w','r','d','s'],'r':['e','t','f','d'],'t':['r','y','g','f'],'y':['t','u','h','g'],'u':['y','i','j','h'],'i':['u','o','k','j'],'o':['i','p','l','k'],'p':['o','l'],'z':['a','s','x'],'x':['z','s','d','c'],'c':['x','d','f','v'],'v':['c','f','g','b'],'b':['v','g','h','n'],'n':['b','h','j','m'],'m':['n','j','k']
-}
 
 # Constructs GUI (D = Ariella, O = Tenzin)
 class PythonTypingTestApp: # defines class of GUI
@@ -398,7 +391,7 @@ class PythonTypingTestApp: # defines class of GUI
     plt.tight_layout()  # adjusts layout to prevent overlap of labels and chart elements
     return fig # returns the completed figure object for embedding in the GUI
 
-  # (D = Ariella, Tenzin; O = Ariella, Tenzin)
+  # (D = Tenzin; O = Ariella)
   def plot_heatmap(self):
     # Define the QWERTY keyboard layout as rows of keys
     qwerty_layout = [
@@ -438,16 +431,6 @@ class PythonTypingTestApp: # defines class of GUI
     ax.set_facecolor("#E7DCC7") # sets background color for the axes
     plt.tight_layout() # adjusts layout to fit everything properly
     return fig
-  
-  # Saves Data on Letter/Word Frequency and Proximity (D = Ariella, O = Tenzin)
-  def save_typing_analysis(self): # saves data (described below) to file after test is over
-    analysis_data = {
-       "common_errors": dict(character_mistype), # data on which characters are most frequently missed by user
-       "proximity_map": keyboard_proximity, # data on which keys are closest to each other (see line 62 for greater elaboration on this point)
-       "common_words": dict(word_counter.most_common(20))} # data on which words appeared most often during tests
-    
-    with open("typing_analysis.json", "w") as f: # opens file
-      json.dump(analysis_data, f, indent=4) # data are placed in file
 
 # Runs the GUI (D = Tenzin, O = Ariella)
 if __name__ == "__main__":
