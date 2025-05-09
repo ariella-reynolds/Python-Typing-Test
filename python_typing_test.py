@@ -60,7 +60,7 @@ class PythonTypingTestApp: # defines class of GUI
     self.root = root # sets up and saves main window of typing test
     self.root.title("Python Typing Test") # creates title of typing test
     self.root.geometry('1020x720') # specifies size of window
-    self.sound_started = False # Initializes sound effect variable
+    self.sound_started = False # initializes sound effect variable
 
     # multi-stage tracking variables (used within GUI class, along with global variables; also used mainly for evolving values)
     self.paragraphs = [] # holds text to be typed by user
@@ -137,7 +137,7 @@ class PythonTypingTestApp: # defines class of GUI
     # difficulty levels and formatting
     self.difficulty = tk.StringVar(value = "medium") # stores difficulty level, with medium difficulty level as default
     ttk.Label(self.root, text="Select Difficulty:", font=('Baskerville', 18), background ='#E7DCC7', foreground ='#1A1A2E').pack(pady=(20, 5)) # labels difficulty level selection window ("Difficulty:")
-    ttk.Combobox(self.root, textvariable = self.difficulty, values = ["easy","medium","hard"]).pack() # allows user to select difficulty (either "easy," "medium," or "hard") through a dropdown option. It is worth noting that only one passage fit the guidelines of "easy."
+    ttk.Combobox(self.root, textvariable = self.difficulty, values = ["easy","medium","hard"]).pack() # allows user to select difficulty (either "easy," "medium," or "hard") through a dropdown option.
 
     self.display_text = tk.Text(self.root, height=7, font=('Baskerville',18), wrap='word', bg='#FFFFFF', fg='#1A1A2E', relief='solid', bd=1)
     self.display_text.pack(fill='x', padx=20, pady=10)
@@ -229,11 +229,11 @@ class PythonTypingTestApp: # defines class of GUI
   def on_key_press(self, event): # methods controls what happens when a user presses a key
     global start_time, char_position, errors, total_char
 
-    # Start the sound only when the user types the first character
+    # starts the sound only when the user types the first character
     if not self.sound_started:
       if key_sound:
-        key_sound.play(loops=-1)  # Start sound when typing begins
-        self.sound_started = True  # Set the flag to indicate that sound has started
+        key_sound.play(loops=-1)  # starts sound when typing begins
+        self.sound_started = True  # sets the flag to indicate that sound has started
     
     if not start_time: # if user hasn't started typing
       start_time = time.time() # start time is the current time when the user hasn't started typing
@@ -276,18 +276,12 @@ class PythonTypingTestApp: # defines class of GUI
       self.display_text.tag_add("cursor", f"1.{next_index}", f"1.{next_index + 1}") # cursor is added to indicate which letter the user should type next
 
     self.display_text.config(state='disabled') # switches display back to read-only format
-      
-    if len(typed_text) >= len(target_text): # if user has typed more than or an equal number of characters as the target text
-      self.end_test() # ends the test
 
   # Post-Test Calculations (D = Tenzin, O = Ariella)
   def end_test(self): # after the test ends
-    if self.sound_started:  # Check if sound is playing
-        key_sound.stop()  # Stop the sound when the test ends
-        self.sound_started = False  # Reset the flag
-    
-    end_time = time.time() # end time is the current time when the user has finished typing
-    full_elapsed = (end_time - self.full_start_time) / 60 if self.full_start_time else 1 # calculates total time (in minutes) spent on typing test (set as one minute in case time was not calculated properly)
+    if self.sound_started:  # checks if sound is playing
+        key_sound.stop()  # stops the sound when the test ends
+        self.sound_started = False  # resets the flag
     
     typed_text = self.hidden_input.get() # user's typed text (collected in hidden input field)
     target_text = self.test # what the user should type for full accuracy
@@ -305,8 +299,15 @@ class PythonTypingTestApp: # defines class of GUI
 
     self.display_text.config(state='disabled') # switches display back to read-only format
     self.progress['value'] = 100 # progress bar is shown to be 100% filled once the user has completed the test
+    
+    self.root.after_cancel(self.update_stats)
 
     self.show_results() # shows results windows when test ends
+  
+  # Closes All Windows (D = Ariella; O = Tenzin)
+  def destroy_everything(self):
+    self.root.after_cancel(self.update_stats)
+    self.root.destroy()
 
   # WPM and Accuracy Statistics (D = Ariella, Tenzin; O = Ariella, Tenzin)
   def show_results(self): # displays typing statistics once test is completed
@@ -360,7 +361,7 @@ class PythonTypingTestApp: # defines class of GUI
     heatmap_canvas.get_tk_widget().grid(row=0, column=1, padx=5, pady=5)  # positions chart in the second column
 
     # closes button
-    close_btn = ttk.Button(dashboard, text="Close", command=dashboard.destroy, style="Red.TButton") # creates a close button styled with the theme
+    close_btn = ttk.Button(dashboard, text="Close", command=self.destroy_everything, style="Red.TButton") # creates a close button styled with the theme
     close_btn.pack(pady=(10, 20)) # places the button at the bottom of the results window with padding
     
     # shows the dashboard
@@ -393,7 +394,7 @@ class PythonTypingTestApp: # defines class of GUI
 
   # (D = Tenzin; O = Ariella)
   def plot_heatmap(self):
-    # Define the QWERTY keyboard layout as rows of keys
+    # defines the QWERTY keyboard layout as rows of keys
     qwerty_layout = [
       ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='],  # Row 0 (number row)
       ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\\'],  # Row 1 (top letter row)
@@ -401,32 +402,32 @@ class PythonTypingTestApp: # defines class of GUI
       ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/']  # Row 3 (bottom letter row)
     ]
 
-    # Create a 4x13 matrix (max row length) initialized to zero
+    # creates a 4x13 matrix (max row length) initialized to zero
     heat_data = [[0] * 13 for _ in range(4)]
 
-    # Create dictionary mapping each key to its row and column position
+    # creates dictionary mapping each key to its row and column position
     key_positions = {char: (row_idx, col_idx) for row_idx, row in enumerate(qwerty_layout) for col_idx, char in enumerate(row)}
 
-    # Map errors to the correct row and column based on the keyboard layout
+    # maps errors to the correct row and column based on the keyboard layout
     for char, count in character_mistype.items():
       pos = key_positions.get(char.upper()) # gets the position of the character from the dictionary
       if pos: # checks if the character position exists
         row_idx, col_idx = pos # unpacks the row and column indices
         heat_data[row_idx][col_idx] = count # updates the heatmap data with the count of errors
 
-    # Create the heatmap
+    # creates the heatmap
     fig, ax = plt.subplots(figsize=(6, 3))  # sets the figure size for the heatmap
     cax = ax.imshow(heat_data, cmap='Reds', interpolation='nearest', aspect='auto') # generates the heatmap
     ax.set_title("Typing Error Heatmap (QWERTY Layout)", fontweight='bold', fontsize=14, color="#1A1A2E") # sets the chart title
 
-    # Set dynamic labels for the heatmap
+    # sets dynamic labels for the heatmap
     ax.set_xticks(range(13)) # sets x-axis ticks for each column
     ax.set_xticklabels(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\\']) # labels for x-axis
     ax.set_yticks(range(4)) # sets y-axis ticks for each row
     ax.set_yticklabels(['Numbers', 'Top Row', 'Middle Row', 'Bottom Row']) # labels for y-axis
     fig.colorbar(cax) # adds a color bar to indicate intensity
 
-    # Style tweaks for consistent visual appearance
+    # style tweaks for consistent visual appearance
     fig.patch.set_facecolor("#E7DCC7") # sets background color for the figure
     ax.set_facecolor("#E7DCC7") # sets background color for the axes
     plt.tight_layout() # adjusts layout to fit everything properly
@@ -437,4 +438,5 @@ if __name__ == "__main__":
   root = tk.Tk()
   app = PythonTypingTestApp(root)
   root.mainloop()
+  del root
 
