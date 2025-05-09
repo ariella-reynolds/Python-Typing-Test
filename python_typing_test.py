@@ -144,7 +144,7 @@ class PythonTypingTestApp: # defines class of GUI
     # difficulty levels and formatting
     self.difficulty = tk.StringVar(value = "medium") # stores difficulty level, with medium difficulty level as default
     ttk.Label(self.root, text="Select Difficulty:", font=('Baskerville', 18), background ='#E7DCC7', foreground ='#1A1A2E').pack(pady=(20, 5)) # labels difficulty level selection window ("Difficulty:")
-    ttk.Combobox(self.root, textvariable = self.difficulty, values = ["easy","medium","hard"]).pack() # allows user to select difficulty (either "easy," "medium," or "hard") through a dropdown option
+    ttk.Combobox(self.root, textvariable = self.difficulty, values = ["easy","medium","hard"]).pack() # allows user to select difficulty (either "easy," "medium," or "hard") through a dropdown option. It is worth noting that only one passage fit the guidelines of "easy."
 
     self.display_text = tk.Text(self.root, height=7, font=('Baskerville',18), wrap='word', bg='#FFFFFF', fg='#1A1A2E', relief='solid', bd=1)
     self.display_text.pack(fill='x', padx=20, pady=10)
